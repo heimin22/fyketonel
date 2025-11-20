@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { GithubIcon } from "lucide-react";
 
@@ -50,9 +51,16 @@ export function RetroNavigation() {
         <div className="flex min-w-[180px] flex-1 justify-start">
           <Link
             href="/"
-            className="retro text-base uppercase tracking-[0.3em]"
+            className="flex items-center"
           >
-            FYKE&apos;S LAB
+            <Image
+              src="/assets/logo.png"
+              alt="Fyke's Lab"
+              width={200}
+              height={100}
+              className="h-auto w-auto max-h-14"
+              priority
+            />
           </Link>
         </div>
 

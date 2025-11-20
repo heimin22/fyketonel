@@ -15,6 +15,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/8bit/avatar";
 import AnimatedStatBars from "@/components/animated-stat-bars";
 import GitHubContributions from "@/components/github-contributions";
+import TechnologiesCarousel from "@/components/technologies-carousel";
 
 const shellClass =
   "rounded-none border-4 border-border bg-card/80 p-8 shadow-[8px_8px_0_var(--border)] backdrop-blur-sm dark:border-ring";
@@ -207,6 +208,8 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      <TechnologiesCarousel />
     </main>
   );
 }
