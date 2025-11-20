@@ -245,3 +245,18 @@
   }
 }
 
+/* Prevent container overlap in Lab Control Center */
+@media (max-width: 374px) {
+  #lab-container .grid > * {
+    /* Ensure sufficient spacing between grid items */
+    margin-bottom: 8px !important;
+  }
+}
+
+@media (min-width: 375px) and (max-width: 639px) {
+  #lab-container .grid > * {
+    /* Ensure sufficient spacing between grid items */
+    margin-bottom: 4px !important;
+  }
+}
+

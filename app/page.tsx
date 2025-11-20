@@ -1,4 +1,4 @@
-import giveMeAJoke from "give-me-a-joke";
+"use client";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/8bit/button";
@@ -16,11 +16,8 @@ import GitHubContributions from "@/components/github-contributions";
 import TechnologiesCarousel from "@/components/technologies-carousel";
 import PlayerProfileCard from "@/components/ui/8bit/blocks/player-profile-card";
 import ContactForm from "@/components/contact-form";
-
-const shellClass =
-  "rounded-none border-4 border-border bg-card/80 p-4 sm:p-6 md:p-8 shadow-[4px_4px_0_var(--border)] sm:shadow-[6px_6px_0_var(--border)] md:shadow-[8px_8px_0_var(--border)] backdrop-blur-sm dark:border-ring";
-const panelClass =
-  "rounded-none border-4 border-border bg-card/80 p-4 sm:p-5 md:p-6 text-center shadow-[4px_4px_0_var(--border)] sm:shadow-[5px_5px_0_var(--border)] md:shadow-[6px_6px_0_var(--border)] backdrop-blur-sm dark:border-ring";
+import { useMediaQuery } from "react-responsive";
+import { useState, useEffect } from "react";
 
 const wishlistItems = [
   {
@@ -45,27 +42,74 @@ const wishlistItems = [
 
 async function getJokeOfTheDay() {
   try {
-    return await new Promise<string>((resolve, reject) => {
-      giveMeAJoke.getRandomDadJoke((joke: string) => {
-        if (joke) {
-          resolve(joke);
-        } else {
-          reject(new Error("No joke received"));
-        }
-      });
+    const response = await fetch("/api/joke", {
+      cache: "no-store",
     });
-  } catch {
+    const data = await response.json();
+    return data.joke;
+  } catch (error) {
+    console.error("Error fetching joke:", error);
     return "The joke machine is recalibrating—check back after the next coffee break.";
   }
 }
 
-export default async function Home() {
-  const joke = await getJokeOfTheDay();
+export default function Home() {
+  const [joke, setJoke] = useState("Loading joke...");
   const today = new Date();
 
+  // Detect screen sizes
+  const isVerySmall = useMediaQuery({ maxWidth: 374 });
+  const isSmall = useMediaQuery({ minWidth: 375, maxWidth: 639 });
+
+  // Simple client-side check
+  const isClient = typeof window !== 'undefined' && (isVerySmall !== undefined || isSmall !== undefined);
+
+  // Fetch joke on mount
+  useEffect(() => {
+    let isMounted = true;
+    
+    const fetchJoke = async () => {
+      const fetchedJoke = await getJokeOfTheDay();
+      if (isMounted) {
+        setJoke(fetchedJoke);
+      }
+    };
+
+    fetchJoke();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Dynamic classes based on screen size
+  const shellClass = isClient && isVerySmall
+    ? "rounded-none border border-border bg-card/80 p-2 shadow-[1px_1px_0_var(--border)] backdrop-blur-sm dark:border-ring"
+    : isClient && isSmall
+    ? "rounded-none border-2 border-border bg-card/80 p-3 shadow-[2px_2px_0_var(--border)] backdrop-blur-sm dark:border-ring"
+    : "rounded-none border-2 border-border bg-card/80 p-3 shadow-[2px_2px_0_var(--border)] backdrop-blur-sm dark:border-ring min-[375px]:border-3 min-[375px]:p-4 min-[375px]:shadow-[3px_3px_0_var(--border)] sm:border-4 sm:p-6 sm:shadow-[6px_6px_0_var(--border)] md:p-8 md:shadow-[8px_8px_0_var(--border)]";
+
+  const panelClass = isClient && isVerySmall
+    ? "rounded-none border border-border bg-card/80 p-2 text-center shadow-[1px_1px_0_var(--border)] backdrop-blur-sm dark:border-ring"
+    : isClient && isSmall
+    ? "rounded-none border-2 border-border bg-card/80 p-3 text-center shadow-[2px_2px_0_var(--border)] backdrop-blur-sm dark:border-ring"
+    : "rounded-none border-2 border-border bg-card/80 p-3 text-center shadow-[2px_2px_0_var(--border)] backdrop-blur-sm dark:border-ring min-[375px]:border-3 min-[375px]:p-4 min-[375px]:shadow-[3px_3px_0_var(--border)] sm:border-4 sm:p-5 sm:shadow-[4px_4px_0_var(--border)] md:p-6 md:shadow-[6px_6px_0_var(--border)]";
+
+  const gridGap = isClient && isVerySmall
+    ? "gap-12"
+    : isClient && isSmall
+    ? "gap-12"
+    : "gap-8 min-[375px]:gap-10 sm:gap-10 md:gap-10";
+
+  const githubContainerClass = isClient && isVerySmall
+    ? "rounded-none border border-dashed border-border bg-background/80 p-2 shadow-[1px_1px_0_var(--border)] overflow-hidden min-h-[180px] flex items-center justify-center"
+    : isClient && isSmall
+    ? "rounded-none border-2 border-dashed border-border bg-background/80 p-2.5 shadow-[2px_2px_0_var(--border)] overflow-hidden min-h-[220px] flex items-center justify-center"
+    : "rounded-none border-2 border-dashed border-border bg-background/80 p-2 shadow-[2px_2px_0_var(--border)] overflow-hidden min-h-[200px] flex items-center justify-center min-[375px]:border-3 min-[375px]:p-2.5 min-[375px]:shadow-[2.5px_2.5px_0_var(--border)] min-[375px]:min-h-[250px] sm:border-4 sm:min-h-[300px] sm:p-3.5 sm:shadow-[3.5px_3.5px_0_var(--border)] md:min-h-[400px] md:p-4 md:shadow-[4px_4px_0_var(--border)]";
+
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[95vw] flex-col gap-8 px-4 py-8 text-foreground sm:gap-10 sm:px-6 sm:py-12 md:gap-12 md:py-16">
-      <section className="flex flex-col items-center gap-4 text-center sm:gap-5 md:gap-6">
+    <main className="mx-auto flex min-h-screen w-full max-w-[95vw] flex-col gap-6 px-3 py-6 text-foreground min-[375px]:gap-7 min-[375px]:px-4 min-[375px]:py-8 sm:gap-10 sm:px-6 sm:py-12 md:gap-12 md:py-16">
+      <section className="flex flex-col items-center gap-3 text-center min-[375px]:gap-4 sm:gap-5 md:gap-6">
         <div className="space-y-2 sm:space-y-3">
           <p className="retro text-[0.5rem] uppercase tracking-[0.3em] text-muted-foreground sm:text-[0.6rem] sm:tracking-[0.35em] md:text-xs md:tracking-[0.4em]">
             Laboratory Intel
@@ -92,8 +136,8 @@ export default async function Home() {
         <p className="retro mb-4 text-center text-[0.5rem] uppercase tracking-[0.25em] text-muted-foreground sm:mb-5 sm:text-[0.6rem] sm:tracking-[0.3em] md:mb-6 md:text-xs md:tracking-[0.35em]">
           Lab Control Center
         </p>
-        <div className="flex flex-col gap-6 sm:gap-7 md:gap-8">
-          <div className="grid gap-6 sm:gap-7 md:gap-8 lg:grid-cols-2 lg:grid-rows-2 lg:auto-rows-fr">
+        <div className={`flex flex-col ${gridGap}`}>
+          <div className={`grid ${gridGap} lg:grid-cols-2 lg:grid-rows-2 lg:auto-rows-fr`}>
             <div className={`${panelClass} flex flex-col`}>
               <p className="retro text-[0.5rem] uppercase tracking-[0.2em] text-muted-foreground sm:text-[0.6rem] sm:tracking-[0.25em] md:text-xs md:tracking-[0.3em]">
                 Mission Planner
@@ -192,12 +236,12 @@ export default async function Home() {
           </div>
 
           <div
-            className={`${panelClass} flex flex-col gap-3 text-center sm:gap-3.5 md:gap-4`}
+            className={`${panelClass} flex flex-col gap-2 text-center min-[375px]:gap-2.5 sm:gap-3.5 md:gap-4`}
           >
             <p className="retro text-[0.5rem] uppercase tracking-[0.2em] text-muted-foreground sm:text-[0.6rem] sm:tracking-[0.25em] md:text-xs md:tracking-[0.3em]">
               heimin22 GitHub Contributions
             </p>
-            <div className="rounded-none border-4 border-dashed border-border bg-background/80 p-3 shadow-[3px_3px_0_var(--border)] overflow-hidden min-h-[250px] flex items-center justify-center sm:min-h-[300px] sm:p-3.5 sm:shadow-[3.5px_3.5px_0_var(--border)] md:min-h-[400px] md:p-4 md:shadow-[4px_4px_0_var(--border)]">
+            <div className={githubContainerClass}>
               <GitHubContributions />
             </div>
             <Button
@@ -219,8 +263,8 @@ export default async function Home() {
 
       <TechnologiesCarousel />
 
-      <section className="space-y-4 sm:space-y-5 md:space-y-6">
-        <div className="space-y-2 text-center sm:space-y-2.5 md:space-y-3">
+      <section className="space-y-3 min-[375px]:space-y-4 sm:space-y-5 md:space-y-6">
+        <div className="space-y-1.5 text-center min-[375px]:space-y-2 sm:space-y-2.5 md:space-y-3">
           <p className="retro text-[0.5rem] uppercase tracking-[0.3em] text-muted-foreground sm:text-[0.6rem] sm:tracking-[0.35em] md:text-xs md:tracking-[0.4em]">
             Get in Touch
           </p>
@@ -229,7 +273,7 @@ export default async function Home() {
           </h2>
         </div>
         <div className={`${shellClass} border-dashed border-foreground/50 dark:border-ring/50`}>
-          <div className="grid gap-4 sm:gap-6 md:gap-8 lg:grid-cols-2">
+          <div className={`grid ${gridGap} lg:grid-cols-2`}>
             {/* Left Side - Contact Info */}
             <div className={`${panelClass} flex flex-col justify-center space-y-4 sm:space-y-5 md:space-y-6`}>
               <div className="space-y-3 sm:space-y-3.5 md:space-y-4">
