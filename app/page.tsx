@@ -1,65 +1,212 @@
-import Image from "next/image";
+import giveMeAJoke from "give-me-a-joke";
 
-export default function Home() {
+import Link from "next/link";
+import { Button } from "@/components/ui/8bit/button";
+import { Calendar } from "@/components/ui/8bit/calendar";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemSeparator,
+  ItemTitle,
+} from "@/components/ui/8bit/item";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/8bit/avatar";
+import AnimatedStatBars from "@/components/animated-stat-bars";
+import GitHubContributions from "@/components/github-contributions";
+
+const shellClass =
+  "rounded-none border-4 border-border bg-card/80 p-8 shadow-[8px_8px_0_var(--border)] backdrop-blur-sm dark:border-ring";
+const panelClass =
+  "rounded-none border-4 border-border bg-card/80 p-6 text-center shadow-[6px_6px_0_var(--border)] backdrop-blur-sm dark:border-ring";
+
+const wishlistItems = [
+  {
+    id: "frieren-manga",
+    title: "Frieren: Remnants of the Departed",
+    price: "₱400-500",
+    description: "I still haven&apos;t completed the volumes yet.",
+  },
+  {
+    id: "chrollo-figure",
+    title: "Banpresto Hunting Archives Chrollo Lucilfer",
+    price: "₱1000",
+    description: "He looks cool.",
+  },
+  {
+    id: "genshin-figures",
+    title: "Arlecchino, Alhaitham, or Neuvilette",
+    price: "???",
+    description: "They are my faves in Genshin Impact.",
+  },
+] as const;
+
+async function getJokeOfTheDay() {
+  try {
+    return await new Promise<string>((resolve, reject) => {
+      giveMeAJoke.getRandomDadJoke((joke: string) => {
+        if (joke) {
+          resolve(joke);
+        } else {
+          reject(new Error("No joke received"));
+        }
+      });
+    });
+  } catch {
+    return "The joke machine is recalibrating—check back after the next coffee break.";
+  }
+}
+
+export default async function Home() {
+  const joke = await getJokeOfTheDay();
+  const today = new Date();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="mx-auto flex min-h-screen w-full max-w-[95vw] flex-col gap-12 px-6 py-16 text-foreground">
+      <section className="flex flex-col items-center gap-6 text-center">
+        <div className="space-y-3">
+          <p className="retro text-xs uppercase tracking-[0.4em] text-muted-foreground">
+            Laboratory Intel
+          </p>
+          <h1 className="retro text-3xl uppercase tracking-[0.3em]">
+            Welcome to Fyke&apos;s Laboratory
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="retro text-base leading-relaxed text-muted-foreground">
+            Where my plans, whatever the hell I want to do are listed here.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        <Button
+          asChild
+          className="retro h-12 px-10 text-base uppercase tracking-[0.3em]"
+        >
+          <Link href="#lab-container">Learn More</Link>
+        </Button>
+      </section>
+
+      <section
+        id="lab-container"
+        className={`${shellClass} border-dashed border-foreground/50 dark:border-ring/50`}
+      >
+        <p className="retro mb-6 text-center text-xs uppercase tracking-[0.35em] text-muted-foreground">
+          Lab Control Center
+        </p>
+        <div className="flex flex-col gap-6">
+          <div className="grid gap-6 lg:grid-cols-2 lg:grid-rows-2 lg:auto-rows-fr">
+            <div className={`${panelClass} flex flex-col`}>
+              <p className="retro text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                Mission Planner
+              </p>
+              <div className="mt-6 flex flex-1 items-center justify-center w-full">
+                <Calendar
+                  mode="single"
+                  selected={today}
+                  initialFocus
+                  className="text-center scale-95 w-full max-w-none"
+                />
+              </div>
+            </div>
+
+            <div className={`${panelClass} text-center flex flex-col`}>
+              <p className="retro text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                Player Card
+              </p>
+              <div className="mt-6 flex flex-1 flex-col items-center justify-center gap-4">
+                <Avatar className="size-24" variant="pixel">
+                  <AvatarImage
+                    src="/assets/minippix.png"
+                    alt="Fyke avatar"
+                    className="object-cover"
+                  />
+                  <AvatarFallback>FY</AvatarFallback>
+                </Avatar>
+                <div className="space-y-2">
+                  <p className="retro text-xl uppercase tracking-[0.3em]">
+                    Fyke
+                  </p>
+                  <p className="retro text-xs uppercase tracking-[0.4em] text-muted-foreground">
+                    Guardian of Chaotic Plans
+                  </p>
+                </div>
+                <AnimatedStatBars healthValue={86} manaValue={64} />
+              </div>
+            </div>
+
+            <div id="wishlist" className={`${panelClass} flex flex-col`}>
+              <p className="retro text-center text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                Wishlist
+              </p>
+              <div className="mt-6 flex flex-1 items-center">
+                <ItemGroup className="gap-3 w-full">
+                  {wishlistItems.map((item, index) => (
+                    <div key={item.id}>
+                      <Item 
+                        variant="outline" 
+                        className="flex flex-col transition-all duration-200 hover:bg-accent/30 hover:border-primary hover:shadow-[4px_4px_0_var(--primary)] hover:-translate-y-1 cursor-pointer"
+                      >
+                        <ItemContent className="flex-1">
+                          <ItemTitle className="retro text-sm uppercase tracking-[0.2em]">
+                            {item.title}
+                          </ItemTitle>
+                          <ItemDescription className="retro text-xs text-muted-foreground mt-1">
+                            {item.description}
+                          </ItemDescription>
+                        </ItemContent>
+                        <ItemActions className="mt-3 flex items-center justify-between w-full">
+                          <span className="retro text-xs font-bold text-primary">
+                            {item.price}
+                          </span>
+                          <span className="retro text-xs text-muted-foreground">
+                            Haven&apos;t bought yet :(
+                          </span>
+                        </ItemActions>
+                      </Item>
+                      {index < wishlistItems.length - 1 && (
+                        <ItemSeparator className="my-3 border-dashed border-border" />
+                      )}
+                    </div>
+                  ))}
+                </ItemGroup>
+              </div>
+            </div>
+
+            <div className={`${panelClass} flex flex-col`}>
+              <p className="retro text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                Random Joke of the Day
+              </p>
+              <div className="mt-6 flex flex-1 items-center justify-center">
+                <p className="retro text-base leading-relaxed text-center text-muted-foreground">
+                  {joke}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={`${panelClass} flex flex-col gap-4 text-center`}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <p className="retro text-xs uppercase tracking-[0.3em] text-muted-foreground">
+              heimin22 GitHub Contributions
+            </p>
+            <div className="rounded-none border-4 border-dashed border-border bg-background/80 p-4 shadow-[4px_4px_0_var(--border)] overflow-hidden min-h-[400px] flex items-center justify-center">
+              <GitHubContributions />
+            </div>
+            <Button
+              asChild
+              variant="outline"
+              className="retro h-10 uppercase tracking-[0.3em]"
+            >
+              <a
+                href="https://github.com/heimin22"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View Profile
+              </a>
+            </Button>
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+    </main>
   );
 }

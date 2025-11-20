@@ -19,6 +19,7 @@
     "hooks": "@/hooks"
   },
   "registries": {
-    "@8bitcn": "https://8bitcn.com/r/{name}.json"
+    "@8bitcn": "https://8bitcn.com/r/{name}.json",
+    "@pixelact-ui": "https://www.pixelactui.com/r/{name}.json"
   }
 }
