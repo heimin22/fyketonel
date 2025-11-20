@@ -27,7 +27,7 @@ const wishlistItems = [
     id: "frieren-manga",
     title: "Frieren: Remnants of the Departed",
     price: "₱400-500",
-    description: "I still haven&apos;t completed the volumes yet.",
+    description: "I still haven't completed the volumes yet.",
   },
   {
     id: "chrollo-figure",
@@ -71,7 +71,7 @@ export default async function Home() {
             Laboratory Intel
           </p>
           <h1 className="retro text-3xl uppercase tracking-[0.3em]">
-            Welcome to Fyke&apos;s Laboratory
+            Welcome to Fyke&#39;s Laboratory
           </h1>
           <p className="retro text-base leading-relaxed text-muted-foreground">
             My laboratory, my playground, my sandbox.
@@ -166,7 +166,7 @@ export default async function Home() {
                             {item.price}
                           </span>
                           <span className="retro text-xs text-muted-foreground">
-                            Haven&apos;t bought yet :(
+                            Haven&#39;t bought yet :(
                           </span>
                         </ItemActions>
                       </Item>
@@ -256,7 +256,7 @@ export default async function Home() {
               
               <div className="border-t-4 border-dashed border-border pt-6 dark:border-ring">
                 <p className="retro text-sm leading-relaxed text-muted-foreground">
-                  Let&apos;s work together! Feel free to reach out for collaborations, projects, or just to say hi.
+                  Let&#39;s work together! Feel free to reach out for collaborations, projects, or just to say hi.
                 </p>
               </div>
             </div>
