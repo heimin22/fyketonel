@@ -44,8 +44,8 @@ export function RetroBackground({
         top: percent(randomFromSeed(baseSeed * 2)),
         left: percent(randomFromSeed(baseSeed * 3)),
         size: px(size),
-        blur: px(size * 0.6),
-        opacity: roundTo(0.4 + randomFromSeed(baseSeed * 4) * 0.6, 6),
+        blur: px(size * 0.1),
+        opacity: roundTo(1.0 + randomFromSeed(baseSeed * 4) * 0.3, 6),
         twinkleDelay: seconds(randomFromSeed(baseSeed * 5) * 6),
         driftDuration: seconds(50 + randomFromSeed(baseSeed * 6) * 40),
       };

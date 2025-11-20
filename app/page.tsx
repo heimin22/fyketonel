@@ -11,7 +11,7 @@ import {
   ItemSeparator,
   ItemTitle,
 } from "@/components/ui/8bit/item";
-import { Avatar, AvatarFallback } from "@/components/ui/8bit/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/8bit/avatar";
 import HealthBar from "@/components/ui/8bit/health-bar";
 import ManaBar from "@/components/ui/8bit/mana-bar";
 import GitHubContributions from "@/components/github-contributions";
@@ -115,6 +115,11 @@ export default async function Home() {
               </p>
               <div className="mt-6 flex flex-1 flex-col items-center justify-center gap-4">
                 <Avatar className="size-24" variant="pixel">
+                  <AvatarImage
+                    src="/assets/minippix.png"
+                    alt="Fyke avatar"
+                    className="object-cover"
+                  />
                   <AvatarFallback>FY</AvatarFallback>
                 </Avatar>
                 <div className="space-y-2">
@@ -126,20 +131,30 @@ export default async function Home() {
                   </p>
                 </div>
                 <div className="flex w-full flex-col gap-4 text-center">
-                  <div className="flex flex-col items-center">
-                    <p className="retro mb-2 text-xs uppercase tracking-[0.3em]">
-                      Health
-                    </p>
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="flex items-center justify-between w-full">
+                      <p className="retro text-xs uppercase tracking-[0.3em]">
+                        Health
+                      </p>
+                      <p className="retro text-xs text-muted-foreground">
+                        86/100
+                      </p>
+                    </div>
                     <HealthBar
                       value={86}
                       variant="retro"
                       className="h-6 w-full"
                     />
                   </div>
-                  <div className="flex flex-col items-center">
-                    <p className="retro mb-2 text-xs uppercase tracking-[0.3em]">
-                      Mana
-                    </p>
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="flex items-center justify-between w-full">
+                      <p className="retro text-xs uppercase tracking-[0.3em]">
+                        Mana
+                      </p>
+                      <p className="retro text-xs text-muted-foreground">
+                        64/100
+                      </p>
+                    </div>
                     <ManaBar
                       value={64}
                       variant="retro"
