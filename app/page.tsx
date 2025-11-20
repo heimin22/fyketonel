@@ -184,7 +184,7 @@ export default async function Home() {
                 A random joke for your mood.
               </p>
               <div className="mt-6 flex flex-1 items-center justify-center">
-                <p className="retro text-base leading-relaxed text-center text-muted-foreground">
+                <p className="retro text-lg leading-relaxed text-center text-muted-foreground">
                   {joke}
                 </p>
               </div>
