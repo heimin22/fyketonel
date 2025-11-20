@@ -4,6 +4,7 @@ import "./globals.css";
 import RetroNavigation from "@/components/retro-navigation";
 import { ThemeProvider } from "@/components/theme-provider";
 import RetroBackground from "@/components/retro-background";
+import RetroFooter from "@/components/retro-footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,6 +45,7 @@ export default function RootLayout({
             <RetroBackground>
               <RetroNavigation />
               {children}
+              <RetroFooter />
             </RetroBackground>
           </ThemeProvider>
         </body>

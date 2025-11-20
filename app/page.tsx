@@ -15,6 +15,7 @@ import {
 import GitHubContributions from "@/components/github-contributions";
 import TechnologiesCarousel from "@/components/technologies-carousel";
 import PlayerProfileCard from "@/components/ui/8bit/blocks/player-profile-card";
+import ContactForm from "@/components/contact-form";
 
 const shellClass =
   "rounded-none border-4 border-border bg-card/80 p-8 shadow-[8px_8px_0_var(--border)] backdrop-blur-sm dark:border-ring";
@@ -217,6 +218,20 @@ export default async function Home() {
       </section>
 
       <TechnologiesCarousel />
+
+      <section className="space-y-6">
+        <div className="space-y-3 text-center">
+          <p className="retro text-xs uppercase tracking-[0.4em] text-muted-foreground">
+            Get in Touch
+          </p>
+          <h2 className="retro text-2xl uppercase tracking-[0.3em]">
+            Contact Me
+          </h2>
+        </div>
+        <div className={`${panelClass} max-w-4xl mx-auto`}>
+          <ContactForm />
+        </div>
+      </section>
     </main>
   );
 }
