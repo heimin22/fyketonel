@@ -7,6 +7,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/8bit/chart";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
+import { Skeleton } from "@/components/ui/8bit/skeleton";
 
 interface ChartData {
   month: string;
@@ -91,10 +92,28 @@ export default function GitHubContributions() {
     fetchContributions();
   }, []);
 
+  // Deterministic heights for skeleton bars to avoid hydration mismatch
+  const skeletonHeights = [65, 45, 80, 55, 70, 40, 85, 60, 75, 50, 68, 72];
+
   if (loading) {
     return (
-      <div className="retro flex h-full w-full items-center justify-center text-sm text-muted-foreground">
-        Loading contributions...
+      <div className="retro w-full flex flex-col gap-4">
+        <div className="text-center">
+          <Skeleton className="h-5 w-64 mx-auto" />
+        </div>
+        <div className="h-[300px] w-full space-y-4">
+          <div className="flex justify-between items-end h-full gap-2 px-8">
+            {skeletonHeights.map((height, i) => (
+              <Skeleton
+                key={i}
+                className="w-full"
+                style={{
+                  height: `${height}%`,
+                }}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
