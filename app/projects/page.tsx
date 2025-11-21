@@ -867,6 +867,209 @@ const RetroVisitorCounter = () => {
   );
 };
 
+const RetroLoadingScreen = ({ tier }: { tier: string }) => {
+  const [progress, setProgress] = useState(0);
+  const [loadingPhase, setLoadingPhase] = useState(0);
+
+  const loadingMessages = useMemo(
+    () => [
+      `ACCESSING TIER ${tier} ARCHIVES...`,
+      "CALIBRATING SPECIMEN FILTERS...",
+      "ESTABLISHING SECURE CONNECTION...",
+      "DECRYPTING DATABASE RECORDS...",
+      `LOADING TIER ${tier} PROJECTS...`,
+    ],
+    [tier]
+  );
+
+  useEffect(() => {
+    // Progress bar animation
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(progressInterval);
+          return 100;
+        }
+        return prev + 5;
+      });
+    }, 30);
+
+    // Phase changes
+    const phaseInterval = setInterval(() => {
+      setLoadingPhase((prev) => (prev + 1) % loadingMessages.length);
+    }, 400);
+
+    return () => {
+      clearInterval(progressInterval);
+      clearInterval(phaseInterval);
+    };
+  }, [tier, loadingMessages.length]);
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-md"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+    >
+      <div className="w-full max-w-md space-y-6 px-4">
+        {/* Terminal-style header */}
+        <div className="rounded-sm border-2 border-primary bg-background p-4 shadow-[0_0_30px_var(--primary)]">
+          {/* Blinking cursor line */}
+          <div className="mb-4 flex items-center gap-2 border-b-2 border-dashed border-border pb-2">
+            <span className="retro text-xs uppercase tracking-[0.2em] text-primary">
+              LAB ARCHIVE SYSTEM
+            </span>
+            <motion.span
+              className="inline-block size-2 bg-primary"
+              animate={{ opacity: [1, 0, 1] }}
+              transition={{ duration: 0.8, repeat: Infinity }}
+            />
+          </div>
+
+          {/* Loading messages */}
+          <div className="space-y-2">
+            {loadingMessages.map((msg, index) => (
+              <motion.div
+                key={msg}
+                className="flex items-center gap-2"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{
+                  opacity: index <= loadingPhase ? 1 : 0.3,
+                  x: 0,
+                }}
+                transition={{ delay: index * 0.1 }}
+              >
+                {index < loadingPhase && (
+                  <span className="retro text-green-500">✓</span>
+                )}
+                {index === loadingPhase && (
+                  <motion.span
+                    className="retro text-primary"
+                    animate={{ opacity: [1, 0.3, 1] }}
+                    transition={{ duration: 0.6, repeat: Infinity }}
+                  >
+                    ▶
+                  </motion.span>
+                )}
+                {index > loadingPhase && (
+                  <span className="retro text-muted-foreground">○</span>
+                )}
+                <span
+                  className={`retro text-[0.55rem] uppercase tracking-[0.15em] ${
+                    index === loadingPhase
+                      ? "text-foreground"
+                      : index < loadingPhase
+                      ? "text-muted-foreground line-through"
+                      : "text-muted-foreground/50"
+                  }`}
+                >
+                  {msg}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Progress bar */}
+          <div className="mt-6 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="retro text-[0.5rem] uppercase tracking-[0.2em] text-muted-foreground">
+                Progress
+              </span>
+              <span className="retro text-[0.5rem] tabular-nums text-primary">
+                {progress}%
+              </span>
+            </div>
+
+            {/* Pixel art progress bar */}
+            <div className="relative h-6 overflow-hidden rounded-sm border-2 border-border bg-background dark:border-ring">
+              {/* Background grid pattern */}
+              <div
+                className="absolute inset-0 opacity-20"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(rgba(var(--primary-rgb,147,51,234),0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--primary-rgb,147,51,234),0.3) 1px, transparent 1px)",
+                  backgroundSize: "4px 4px",
+                }}
+              />
+
+              {/* Progress fill with pixel effect */}
+              <motion.div
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-primary/80 to-primary"
+                style={{ width: `${progress}%` }}
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+              >
+                {/* Animated scanline */}
+                <motion.div
+                  className="absolute inset-y-0 w-1 bg-white/50"
+                  animate={{ x: ["0%", "100%"] }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                />
+
+                {/* Pixel blocks */}
+                <div className="flex h-full items-center gap-0.5 px-1">
+                  {Array.from({ length: Math.floor(progress / 5) }).map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="size-1 bg-white/30"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: i * 0.02 }}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Status indicators */}
+            <div className="flex items-center justify-between pt-2">
+              <div className="flex items-center gap-1.5">
+                <motion.div
+                  className="size-2 rounded-full bg-green-500"
+                  animate={{ opacity: [1, 0.3, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                />
+                <span className="retro text-[0.45rem] uppercase tracking-wider text-green-600 dark:text-green-400">
+                  System Active
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                {[0, 1, 2].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="size-1 bg-primary"
+                    animate={{ opacity: [0.3, 1, 0.3] }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      delay: i * 0.2,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Warning label */}
+        <motion.div
+          className="flex items-center justify-center gap-2"
+          animate={{ opacity: [1, 0.5, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-primary/50" />
+          <span className="retro text-[0.45rem] uppercase tracking-[0.3em] text-primary">
+            Do Not Interrupt
+          </span>
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-primary/50" />
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+};
+
 const ProjectDependenciesGraph = ({
   projects,
   panelClass,
@@ -1985,6 +2188,8 @@ export default function ProjectsPage() {
   const [activeTier, setActiveTier] = useState<TierFilter>("ALL");
   const [activeImage, setActiveImage] = useState<{ src: string; alt: string } | null>(null);
   const [hoveredProjectId, setHoveredProjectId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingTier, setLoadingTier] = useState<string>("");
 
   const isClient =
     typeof window !== "undefined" &&
@@ -2058,7 +2263,21 @@ export default function ProjectsPage() {
   );
 
   const handleTierToggle = (tier: Tier) => {
-    setActiveTier((prev) => (prev === tier ? "ALL" : tier));
+    const newTier = activeTier === tier ? "ALL" : tier;
+    
+    // Show loading screen only when changing to a specific tier (not when clearing)
+    if (newTier !== "ALL") {
+      setIsLoading(true);
+      setLoadingTier(newTier);
+      
+      // Show loading screen for 1.5 seconds
+      setTimeout(() => {
+        setActiveTier(newTier);
+        setIsLoading(false);
+      }, 1500);
+    } else {
+      setActiveTier(newTier);
+    }
   };
 
   const handleImageZoom = (image: { src: string; alt: string }) => {
@@ -2091,6 +2310,11 @@ export default function ProjectsPage() {
 
   return (
     <>
+      {/* Retro Loading Screen */}
+      <AnimatePresence>
+        {isLoading && <RetroLoadingScreen tier={loadingTier} />}
+      </AnimatePresence>
+
       <LabStatusMonitor 
         activeCount={activeProjectsCount} 
         archivedCount={archivedProjectsCount} 
