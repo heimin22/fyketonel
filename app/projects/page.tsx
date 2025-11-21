@@ -624,6 +624,553 @@ const QuestionMarkBlock = ({
 
 type TierFilter = Tier | "ALL";
 
+const motivationalQuotes = [
+  "Code is poetry in motion.",
+  "Debugging is the art of removing bugs you didn't know you had.",
+  "Keep calm and push to production.",
+  "Coffee: because adulting is hard.",
+  "There's no place like 127.0.0.1",
+  "I speak fluent sarcasm and code.",
+  "Ctrl+Z is my superpower.",
+  "Sleep is for the weak... or well-rested.",
+  "In code we trust.",
+  "May your builds be green and your coffee be strong.",
+  "Syntax errors are just happy little accidents.",
+  "If at first you don't succeed, call it version 1.0",
+  "I don't always test my code, but when I do, I do it in production.",
+  "Programmer (noun): a machine that turns coffee into code.",
+  "Reality is just a poorly implemented simulation.",
+];
+
+const RetroVisitorCounter = () => {
+  const [visitorCount, setVisitorCount] = useState("0000000");
+  const [displayMode, setDisplayMode] = useState<"decimal" | "binary" | "hex">("decimal");
+
+  useEffect(() => {
+    // Generate ridiculous numbers that keep incrementing
+    const counterInterval = setInterval(() => {
+      const modes = ["decimal", "binary", "hex"] as const;
+      const randomMode = modes[Math.floor(Math.random() * modes.length)];
+      setDisplayMode(randomMode);
+
+      // Generate absurd numbers
+      const absurdNumbers = [
+        "9999999", // Over 9 million!
+        "1337420", // Leet + meme
+        "8008135", // Classic calculator
+        "4242424", // The answer times many
+        "6660666", // Spooky
+        "1234567", // Sequential
+        "7777777", // Lucky
+        "0000001", // Just started (obviously fake)
+        "9876543", // Reverse
+        "5318008", // Classic upside-down calculator
+        "1111111", // All ones
+        "3141592", // Pi
+        "2718281", // e
+        "1618033", // Golden ratio
+        "8675309", // Jenny's number
+      ];
+
+      const randomNumber = absurdNumbers[Math.floor(Math.random() * absurdNumbers.length)];
+      
+      if (randomMode === "binary") {
+        // Convert to binary and pad
+        const num = parseInt(randomNumber);
+        setVisitorCount(num.toString(2).padStart(24, "0"));
+      } else if (randomMode === "hex") {
+        // Convert to hex and pad
+        const num = parseInt(randomNumber);
+        setVisitorCount("0x" + num.toString(16).toUpperCase().padStart(7, "0"));
+      } else {
+        setVisitorCount(randomNumber);
+      }
+    }, 3000);
+
+    return () => clearInterval(counterInterval);
+  }, []);
+
+  const getLabel = () => {
+    switch (displayMode) {
+      case "binary":
+        return "Visitors (Binary)";
+      case "hex":
+        return "Visitors (Hexadecimal)";
+      default:
+        return "Total Lab Visitors";
+    }
+  };
+
+  return (
+    <motion.div
+      className="mx-auto w-fit"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="rounded-none border-4 border-border bg-gradient-to-b from-yellow-200 via-yellow-300 to-yellow-400 p-3 shadow-[4px_4px_0_var(--border)] dark:border-ring dark:from-yellow-700 dark:via-yellow-800 dark:to-yellow-900">
+        <div className="space-y-2">
+          <div className="flex items-center justify-center gap-2">
+            <motion.span
+              className="text-lg"
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              🎉
+            </motion.span>
+            <p className="retro text-center text-[0.5rem] uppercase tracking-[0.25em] text-yellow-900 dark:text-yellow-200">
+              {getLabel()}
+            </p>
+            <motion.span
+              className="text-lg"
+              animate={{ rotate: [0, -10, 10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+            >
+              🎊
+            </motion.span>
+          </div>
+          
+          <div className="rounded-sm border-2 border-yellow-800 bg-black px-4 py-2 dark:border-yellow-400">
+            <motion.div
+              key={visitorCount}
+              className="retro text-center font-mono text-2xl tabular-nums text-green-400 sm:text-3xl"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                textShadow: "0 0 10px rgba(74, 222, 128, 0.8), 0 0 20px rgba(74, 222, 128, 0.4)",
+                letterSpacing: displayMode === "binary" ? "0.1em" : "0.2em",
+                fontSize: displayMode === "binary" ? "0.75rem" : undefined,
+              }}
+            >
+              {visitorCount}
+            </motion.div>
+          </div>
+
+          <div className="flex items-center justify-center gap-1">
+            <motion.span
+              className="inline-block size-1.5 rounded-full bg-red-600"
+              animate={{ opacity: [1, 0.3, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <p className="retro text-center text-[0.4rem] italic text-yellow-900 dark:text-yellow-300">
+              {displayMode === "binary" 
+                ? "Counting in machine language..." 
+                : displayMode === "hex"
+                ? "Elite hacker mode enabled"
+                : "You are visitor number [REDACTED]"}
+            </p>
+            <motion.span
+              className="inline-block size-1.5 rounded-full bg-red-600"
+              animate={{ opacity: [1, 0.3, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.75 }}
+            />
+          </div>
+        </div>
+
+        {/* Fake "since 1996" badge */}
+        <div className="mt-2 border-t-2 border-dashed border-yellow-800 pt-2 dark:border-yellow-400">
+          <div className="flex items-center justify-center gap-2 text-[0.4rem] text-yellow-900 dark:text-yellow-300">
+            <span className="retro">EST. 1996</span>
+            <span>•</span>
+            <span className="retro">GEOCITIES CERTIFIED</span>
+            <span>•</span>
+            <motion.span
+              className="retro"
+              animate={{ opacity: [1, 0.5, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              UNDER CONSTRUCTION
+            </motion.span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const LabStatusMonitor = ({ 
+  activeCount, 
+  archivedCount 
+}: { 
+  activeCount: number; 
+  archivedCount: number;
+}) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [labTime, setLabTime] = useState(new Date());
+  const [caffeineLevel, setCaffeineLevel] = useState(75);
+  const [currentQuote, setCurrentQuote] = useState(motivationalQuotes[0]);
+
+  useEffect(() => {
+    // Update time every second
+    const timeInterval = setInterval(() => {
+      setLabTime(new Date());
+    }, 1000);
+
+    // Randomly fluctuate caffeine level every 5 seconds
+    const caffeineInterval = setInterval(() => {
+      setCaffeineLevel((prev) => {
+        const change = Math.random() > 0.5 ? 5 : -5;
+        const newLevel = prev + change;
+        return Math.max(10, Math.min(100, newLevel));
+      });
+    }, 5000);
+
+    // Change quote every 15 seconds
+    const quoteInterval = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
+      setCurrentQuote(motivationalQuotes[randomIndex]);
+    }, 15000);
+
+    return () => {
+      clearInterval(timeInterval);
+      clearInterval(caffeineInterval);
+      clearInterval(quoteInterval);
+    };
+  }, []);
+
+  const getCaffeineColor = () => {
+    if (caffeineLevel >= 70) return "bg-green-600";
+    if (caffeineLevel >= 40) return "bg-yellow-600";
+    return "bg-red-600";
+  };
+
+  const getInspirationLevel = () => {
+    const hour = labTime.getHours();
+    if (hour >= 9 && hour < 12) return { level: 85, color: "bg-blue-600" };
+    if (hour >= 14 && hour < 17) return { level: 72, color: "bg-cyan-600" };
+    if (hour >= 20 || hour < 2) return { level: 95, color: "bg-purple-600" };
+    return { level: 60, color: "bg-slate-600" };
+  };
+
+  const inspiration = getInspirationLevel();
+
+  return (
+    <>
+      {/* Desktop Version */}
+      <motion.aside
+        className="fixed right-4 top-24 z-40 hidden w-72 lg:block"
+        initial={{ x: 320 }}
+        animate={{ x: isExpanded ? 0 : 260 }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      >
+        {/* Pull Tab Button */}
+        <motion.button
+          type="button"
+          onClick={() => setIsExpanded(true)}
+          className="absolute -left-8 top-1/2 flex h-16 w-8 -translate-y-1/2 items-center justify-center rounded-l-sm border-4 border-r-0 border-border bg-card/95 shadow-[4px_4px_0_var(--border)] backdrop-blur-sm transition-colors hover:bg-primary/20 dark:border-ring"
+          animate={{ opacity: isExpanded ? 0 : 1, pointerEvents: isExpanded ? "none" : "auto" }}
+          transition={{ duration: 0.2 }}
+          aria-label="Open lab status monitor"
+        >
+          <motion.span
+            className="retro text-xl text-primary"
+            animate={{ x: [0, -3, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            ◀
+          </motion.span>
+        </motion.button>
+
+        <div className="rounded-none border-4 border-border bg-card/95 shadow-[6px_6px_0_var(--border)] backdrop-blur-sm dark:border-ring">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b-4 border-border bg-primary/10 px-3 py-2 dark:border-ring">
+          <div className="flex items-center gap-2">
+            <motion.span
+              className="inline-block size-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"
+              animate={{ opacity: [1, 0.3, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <span className="retro text-[0.6rem] uppercase tracking-[0.2em] text-foreground">
+              Lab Status
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="retro flex size-6 items-center justify-center rounded-none border-2 border-border bg-background text-xs transition-transform hover:scale-110 active:scale-95 dark:border-ring"
+            aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            {isExpanded ? "−" : "+"}
+          </button>
+        </div>
+
+        {/* Content */}
+        <motion.div
+          className="space-y-3 p-3"
+          initial={false}
+          animate={{ opacity: isExpanded ? 1 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          {/* Lab Time */}
+          <div className="space-y-1">
+            <p className="retro text-[0.5rem] uppercase tracking-[0.2em] text-muted-foreground">
+              Lab Time
+            </p>
+            <div className="rounded-sm border border-dashed border-border/60 bg-background/70 px-2 py-1.5 dark:border-ring/60">
+              <p className="retro text-center text-sm tabular-nums text-primary">
+                {labTime.toLocaleTimeString('en-US', { 
+                  hour12: false,
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit'
+                })}
+              </p>
+              <p className="retro text-center text-[0.45rem] text-muted-foreground">
+                {labTime.toLocaleDateString('en-US', { 
+                  weekday: 'short',
+                  month: 'short',
+                  day: 'numeric'
+                })}
+              </p>
+            </div>
+          </div>
+
+          {/* Experiments Status */}
+          <div className="space-y-1">
+            <p className="retro text-[0.5rem] uppercase tracking-[0.2em] text-muted-foreground">
+              Specimen Status
+            </p>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between rounded-sm border border-border/60 bg-green-600/10 px-2 py-1 dark:border-ring/60">
+                <span className="retro text-[0.5rem] uppercase tracking-[0.15em] text-foreground">
+                  Active
+                </span>
+                <span className="retro text-sm font-bold text-green-600">
+                  {activeCount}
+                </span>
+              </div>
+              <div className="flex items-center justify-between rounded-sm border border-border/60 bg-slate-600/10 px-2 py-1 dark:border-ring/60">
+                <span className="retro text-[0.5rem] uppercase tracking-[0.15em] text-foreground">
+                  Archived
+                </span>
+                <span className="retro text-sm font-bold text-slate-600">
+                  {archivedCount}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Caffeine Level */}
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <p className="retro text-[0.5rem] uppercase tracking-[0.2em] text-muted-foreground">
+                Caffeine Level
+              </p>
+              <span className="retro text-[0.5rem] text-foreground">
+                {caffeineLevel}%
+              </span>
+            </div>
+            <div className="h-3 rounded-sm border-2 border-border bg-background dark:border-ring">
+              <motion.div
+                className={cn("h-full rounded-sm", getCaffeineColor())}
+                initial={{ width: "0%" }}
+                animate={{ width: `${caffeineLevel}%` }}
+                transition={{ duration: 0.5 }}
+              />
+            </div>
+            <p className="retro text-[0.45rem] italic text-muted-foreground">
+              {caffeineLevel >= 70
+                ? "Optimal coding conditions"
+                : caffeineLevel >= 40
+                ? "Refill recommended"
+                : "CRITICAL: Coffee needed!"}
+            </p>
+          </div>
+
+          {/* Inspiration Meter */}
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <p className="retro text-[0.5rem] uppercase tracking-[0.2em] text-muted-foreground">
+                Inspiration Meter
+              </p>
+              <span className="retro text-[0.5rem] text-foreground">
+                {inspiration.level}%
+              </span>
+            </div>
+            <div className="h-3 rounded-sm border-2 border-border bg-background dark:border-ring">
+              <motion.div
+                className={cn("h-full rounded-sm", inspiration.color)}
+                animate={{ width: `${inspiration.level}%` }}
+                transition={{ duration: 0.5 }}
+              />
+            </div>
+          </div>
+
+          {/* Motivational Quote */}
+          <div className="rounded-sm border border-dashed border-primary/40 bg-primary/5 px-2 py-2">
+            <motion.p
+              key={currentQuote}
+              className="retro text-center text-[0.5rem] leading-relaxed text-foreground"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              &quot;{currentQuote}&quot;
+            </motion.p>
+          </div>
+        </motion.div>
+        </div>
+      </motion.aside>
+
+      {/* Mobile Version */}
+      <motion.div
+        className="fixed inset-x-0 bottom-0 z-40 lg:hidden"
+        initial={{ y: 100 }}
+        animate={{ y: isExpanded ? 0 : "calc(100% - 48px)" }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      >
+        <div className="rounded-t-none border-4 border-b-0 border-border bg-card/95 shadow-[0_-4px_0_var(--border)] backdrop-blur-sm dark:border-ring">
+          {/* Mobile Header */}
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="flex w-full items-center justify-between border-b-4 border-border bg-primary/10 px-4 py-3 dark:border-ring"
+          >
+            <div className="flex items-center gap-2">
+              <motion.span
+                className="inline-block size-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <span className="retro text-[0.6rem] uppercase tracking-[0.2em] text-foreground">
+                Lab Status Monitor
+              </span>
+            </div>
+            <motion.span
+              className="retro text-lg text-primary"
+              animate={{ rotate: isExpanded ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              ▼
+            </motion.span>
+          </button>
+
+          {/* Mobile Content - Horizontal Scroll */}
+          <motion.div
+            className="overflow-x-auto overflow-y-hidden p-3"
+            initial={false}
+            animate={{ 
+              height: isExpanded ? "auto" : 0,
+              opacity: isExpanded ? 1 : 0 
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="flex gap-3 pb-2" style={{ minWidth: "max-content" }}>
+              {/* Lab Time */}
+              <div className="w-40 shrink-0 space-y-1">
+                <p className="retro text-[0.45rem] uppercase tracking-[0.2em] text-muted-foreground">
+                  Lab Time
+                </p>
+                <div className="rounded-sm border border-dashed border-border/60 bg-background/70 px-2 py-1.5 dark:border-ring/60">
+                  <p className="retro text-center text-xs tabular-nums text-primary">
+                    {labTime.toLocaleTimeString('en-US', { 
+                      hour12: false,
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit'
+                    })}
+                  </p>
+                  <p className="retro text-center text-[0.4rem] text-muted-foreground">
+                    {labTime.toLocaleDateString('en-US', { 
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              {/* Experiments Status */}
+              <div className="w-36 shrink-0 space-y-1">
+                <p className="retro text-[0.45rem] uppercase tracking-[0.2em] text-muted-foreground">
+                  Specimens
+                </p>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between rounded-sm border border-border/60 bg-green-600/10 px-2 py-0.5 dark:border-ring/60">
+                    <span className="retro text-[0.45rem] uppercase tracking-[0.15em] text-foreground">
+                      Active
+                    </span>
+                    <span className="retro text-xs font-bold text-green-600">
+                      {activeCount}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-sm border border-border/60 bg-slate-600/10 px-2 py-0.5 dark:border-ring/60">
+                    <span className="retro text-[0.45rem] uppercase tracking-[0.15em] text-foreground">
+                      Archived
+                    </span>
+                    <span className="retro text-xs font-bold text-slate-600">
+                      {archivedCount}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Caffeine Level */}
+              <div className="w-44 shrink-0 space-y-1">
+                <div className="flex items-center justify-between">
+                  <p className="retro text-[0.45rem] uppercase tracking-[0.2em] text-muted-foreground">
+                    Caffeine
+                  </p>
+                  <span className="retro text-[0.45rem] text-foreground">
+                    {caffeineLevel}%
+                  </span>
+                </div>
+                <div className="h-2.5 rounded-sm border-2 border-border bg-background dark:border-ring">
+                  <motion.div
+                    className={cn("h-full rounded-sm", getCaffeineColor())}
+                    animate={{ width: `${caffeineLevel}%` }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
+                <p className="retro text-[0.4rem] italic text-muted-foreground">
+                  {caffeineLevel >= 70
+                    ? "Optimal"
+                    : caffeineLevel >= 40
+                    ? "Refill rec."
+                    : "CRITICAL!"}
+                </p>
+              </div>
+
+              {/* Inspiration Meter */}
+              <div className="w-44 shrink-0 space-y-1">
+                <div className="flex items-center justify-between">
+                  <p className="retro text-[0.45rem] uppercase tracking-[0.2em] text-muted-foreground">
+                    Inspiration
+                  </p>
+                  <span className="retro text-[0.45rem] text-foreground">
+                    {inspiration.level}%
+                  </span>
+                </div>
+                <div className="h-2.5 rounded-sm border-2 border-border bg-background dark:border-ring">
+                  <motion.div
+                    className={cn("h-full rounded-sm", inspiration.color)}
+                    animate={{ width: `${inspiration.level}%` }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
+              </div>
+
+              {/* Motivational Quote */}
+              <div className="w-64 shrink-0 rounded-sm border border-dashed border-primary/40 bg-primary/5 px-2 py-2">
+                <motion.p
+                  key={currentQuote}
+                  className="retro text-center text-[0.45rem] leading-relaxed text-foreground"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  &quot;{currentQuote}&quot;
+                </motion.p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </motion.div>
+    </>
+  );
+};
+
 export default function ProjectsPage() {
   const isVerySmall = useMediaQuery({ maxWidth: 374 });
   const isSmall = useMediaQuery({ minWidth: 375, maxWidth: 639 });
@@ -691,6 +1238,16 @@ export default function ProjectsPage() {
     [activeTier, sortedProjects]
   );
 
+  const activeProjectsCount = useMemo(
+    () => sortedProjects.filter((project) => project.link).length,
+    [sortedProjects]
+  );
+
+  const archivedProjectsCount = useMemo(
+    () => sortedProjects.filter((project) => !project.link).length,
+    [sortedProjects]
+  );
+
   const handleTierToggle = (tier: Tier) => {
     setActiveTier((prev) => (prev === tier ? "ALL" : tier));
   };
@@ -724,8 +1281,13 @@ export default function ProjectsPage() {
   }, [activeImage]);
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[95vw] flex-col gap-6 px-3 py-6 text-foreground min-[375px]:gap-7 min-[375px]:px-4 min-[375px]:py-8 sm:gap-10 sm:px-6 sm:py-12 md:gap-12 md:py-16">
-      <section className="flex flex-col items-center gap-3 text-center min-[375px]:gap-4 sm:gap-5 md:gap-6">
+    <>
+      <LabStatusMonitor 
+        activeCount={activeProjectsCount} 
+        archivedCount={archivedProjectsCount} 
+      />
+      <main className="mx-auto flex min-h-screen w-full max-w-[95vw] flex-col gap-6 px-3 py-6 text-foreground min-[375px]:gap-7 min-[375px]:px-4 min-[375px]:py-8 sm:gap-10 sm:px-6 sm:py-12 md:gap-12 md:py-16">
+        <section className="flex flex-col items-center gap-3 text-center min-[375px]:gap-4 sm:gap-5 md:gap-6">
         <div className="space-y-2 sm:space-y-3">
           <p className="retro text-[0.5rem] uppercase tracking-[0.3em] text-muted-foreground sm:text-[0.6rem] sm:tracking-[0.35em] md:text-xs md:tracking-[0.4em]">
             Project Intel
@@ -744,6 +1306,7 @@ export default function ProjectsPage() {
         >
           <Link href="#archive-container">Skip to Citadel</Link>
         </Button>
+        <RetroVisitorCounter />
       </section>
 
       <section
@@ -1085,7 +1648,8 @@ export default function ProjectsPage() {
           </div>
         </div>
       )}
-    </main>
+      </main>
+    </>
   );
 }
 
