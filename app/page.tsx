@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/8bit/button";
-import { Calendar } from "@/components/ui/8bit/calendar";
+import InteractiveCalendar from "@/components/interactive-calendar";
 import {
   Item,
   ItemActions,
@@ -146,12 +146,7 @@ export default function Home() {
                 Mission Planner
               </p>
               <div className="mt-4 flex flex-1 items-center justify-center w-full sm:mt-5 md:mt-6">
-                <Calendar
-                  mode="single"
-                  selected={today}
-                  initialFocus
-                  className="text-center scale-75 w-full max-w-none sm:scale-90 md:scale-95"
-                />
+                <InteractiveCalendar className="scale-75 w-full max-w-none sm:scale-90 md:scale-95" />
               </div>
             </div>
 
