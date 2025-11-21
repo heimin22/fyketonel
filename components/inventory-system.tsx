@@ -317,16 +317,14 @@ function InventorySlot({
       className="group relative"
       onHoverStart={onHoverStart}
       onHoverEnd={onHoverEnd}
-      whileHover={{ scale: 1.05, y: -4 }}
-      transition={{ duration: 0.2 }}
     >
       {/* Item Card */}
       <div
         className={cn(
-          "relative aspect-square cursor-pointer rounded-none border-2 backdrop-blur-sm transition-all duration-300 sm:border-3 md:border-3",
+          "relative aspect-square cursor-pointer rounded-none border-2 backdrop-blur-sm transition-all duration-200 sm:border-3 md:border-3",
           rarityColors[item.rarity],
           rarityBg[item.rarity],
-          "shadow-[1px_1px_0_var(--border)] hover:shadow-[3px_3px_0_var(--border)] sm:shadow-[2px_2px_0_var(--border)] sm:hover:shadow-[4px_4px_0_var(--border)]",
+          "shadow-[1px_1px_0_var(--border)] hover:bg-accent/30 hover:border-primary hover:shadow-[3px_3px_0_var(--primary)] sm:hover:shadow-[4px_4px_0_var(--primary)] hover:-translate-y-1 sm:shadow-[2px_2px_0_var(--border)]",
           rarityGlow[item.rarity]
         )}
       >
@@ -365,14 +363,11 @@ function InventorySlot({
         </div>
 
         {/* Shine effect */}
-        <motion.div
+        <div
           className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           style={{
             background: "linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)",
           }}
-          initial={{ x: "-100%", y: "-100%" }}
-          whileHover={{ x: "100%", y: "100%" }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
         />
       </div>
 
