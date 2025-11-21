@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 import {
   Accordion,
@@ -642,6 +642,84 @@ const motivationalQuotes = [
   "Reality is just a poorly implemented simulation.",
 ];
 
+const labNotes = [
+  "This one kept me up for 3 days straight.",
+  "My obra maestra, a work of art.",
+  "Dealing with the UX devil himself.",
+  "My magnum opus 🎨",
+  "Fueled entirely by coffee and spite",
+  "Started at 3 AM, finished at 3 AM (next day)",
+  "\"It's just a small change\" they said... 1st project that worked.",
+  "Debugged this for longer than I built it",
+  "Random 3 AM motivation.",
+  "A short practice for the codefest.",
+  "Peak programming flow achieved here",
+  "Made me question my career choices",
+  "Client loved it. I'm still confused.",
+  "This shouldn't work... but it does 🤷",
+  "Refactored 6 times. Still not happy.",
+  "The documentation is lying",
+  "Future me will hate past me for this",
+  "Stack Overflow saved my life here",
+  "Wrote this on a plane with no WiFi",
+  "The deadline was yesterday",
+  "Best code I've ever written (no cap)",
+  "I was too tired to give up",
+  "Worth every hour of sleep I lost",
+  "Client said 'make it pop' 💥",
+];
+
+const StickyNote = ({ note, index }: { note: string; index: number }) => {
+  // Randomize sticky note colors and rotations
+  const colors = [
+    "bg-yellow-200 dark:bg-yellow-600",
+    "bg-pink-200 dark:bg-pink-600",
+    "bg-blue-200 dark:bg-blue-600",
+    "bg-green-200 dark:bg-green-600",
+    "bg-purple-200 dark:bg-purple-600",
+  ];
+  
+  const rotations = ["rotate-2", "-rotate-2", "rotate-1", "-rotate-1", "rotate-3", "-rotate-3"];
+  
+  const color = colors[index % colors.length];
+  const rotation = rotations[index % rotations.length];
+
+  return (
+    <motion.div
+      className={cn(
+        "pointer-events-none absolute -top-2 left-1/2 z-20 w-48 -translate-x-1/2 p-3 shadow-lg",
+        color,
+        rotation
+      )}
+      initial={{ opacity: 0, y: 10, scale: 0.8 }}
+      animate={{ opacity: 1, y: -10, scale: 1 }}
+      exit={{ opacity: 0, y: 5, scale: 0.9 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      style={{
+        filter: "drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3))",
+      }}
+    >
+      {/* Tape effect */}
+      <div className="absolute -top-2 left-1/2 h-4 w-12 -translate-x-1/2 bg-white/40 dark:bg-white/20" 
+        style={{ 
+          clipPath: "polygon(0 20%, 100% 20%, 100% 80%, 0 80%)",
+        }}
+      />
+      
+      <p className="retro text-center text-[0.5rem] leading-relaxed text-gray-800 dark:text-gray-200">
+        {note}
+      </p>
+      
+      {/* Paper texture lines */}
+      <div className="absolute inset-x-3 top-8 space-y-2 opacity-20">
+        <div className="h-px bg-gray-600" />
+        <div className="h-px bg-gray-600" />
+        <div className="h-px bg-gray-600" />
+      </div>
+    </motion.div>
+  );
+};
+
 const RetroVisitorCounter = () => {
   const [visitorCount, setVisitorCount] = useState("0000000");
   const [displayMode, setDisplayMode] = useState<"decimal" | "binary" | "hex">("decimal");
@@ -1176,6 +1254,7 @@ export default function ProjectsPage() {
   const isSmall = useMediaQuery({ minWidth: 375, maxWidth: 639 });
   const [activeTier, setActiveTier] = useState<TierFilter>("ALL");
   const [activeImage, setActiveImage] = useState<{ src: string; alt: string } | null>(null);
+  const [hoveredProjectId, setHoveredProjectId] = useState<string | null>(null);
 
   const isClient =
     typeof window !== "undefined" &&
@@ -1334,27 +1413,40 @@ export default function ProjectsPage() {
             </div>
             {filteredProjects.length > 0 ? (
               <ol className="grid gap-3 min-[520px]:grid-cols-2">
-                {filteredProjects.map((project, index) => (
-                  <li
-                    key={project.id}
-                    className="rounded-sm border border-dashed border-border/70 px-3 py-2 shadow-[2px_2px_0_var(--border)] dark:border-ring/70"
-                  >
-                    <div className="flex items-center justify-between text-[0.5rem] uppercase tracking-[0.2em] text-muted-foreground">
-                      <span className="retro">
-                        Case {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <span className="retro">
-                        Tier {project.classification.tier}
-                      </span>
-                    </div>
-                    <p className="retro mt-1 text-sm uppercase tracking-[0.1em]">
-                      {project.title}
-                    </p>
-                    <p className="retro text-[0.55rem] text-primary/80">
-                      {project.tagline}
-                    </p>
-                  </li>
-                ))}
+                {filteredProjects.map((project, index) => {
+                  const noteIndex = sortedProjects.findIndex(p => p.id === project.id);
+                  const note = labNotes[noteIndex % labNotes.length];
+                  
+                  return (
+                    <li
+                      key={project.id}
+                      className="relative rounded-sm border border-dashed border-border/70 px-3 py-2 shadow-[2px_2px_0_var(--border)] transition-all duration-200 hover:-translate-y-1 hover:border-primary hover:shadow-[3px_3px_0_var(--primary)] dark:border-ring/70"
+                      onMouseEnter={() => setHoveredProjectId(project.id)}
+                      onMouseLeave={() => setHoveredProjectId(null)}
+                    >
+                      <AnimatePresence>
+                        {hoveredProjectId === project.id && (
+                          <StickyNote note={note} index={noteIndex} />
+                        )}
+                      </AnimatePresence>
+                      
+                      <div className="flex items-center justify-between text-[0.5rem] uppercase tracking-[0.2em] text-muted-foreground">
+                        <span className="retro">
+                          Case {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <span className="retro">
+                          Tier {project.classification.tier}
+                        </span>
+                      </div>
+                      <p className="retro mt-1 text-sm uppercase tracking-[0.1em]">
+                        {project.title}
+                      </p>
+                      <p className="retro text-[0.55rem] text-primary/80">
+                        {project.tagline}
+                      </p>
+                    </li>
+                  );
+                })}
               </ol>
             ) : (
               <div className="rounded-sm border border-dashed border-border/70 bg-background/70 px-4 py-6 text-center shadow-[2px_2px_0_var(--border)] dark:border-ring/70">
