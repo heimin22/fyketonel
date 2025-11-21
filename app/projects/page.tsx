@@ -867,6 +867,441 @@ const RetroVisitorCounter = () => {
   );
 };
 
+const ProjectDependenciesGraph = ({
+  projects,
+  panelClass,
+}: {
+  projects: ProjectEntry[];
+  panelClass: string;
+}) => {
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [hoveredProject, setHoveredProject] = useState<string | null>(null);
+
+  // Define project relationships
+  const relationships = useMemo(() => {
+    const relations: Array<{
+      from: string;
+      to: string;
+      type: "parent" | "sibling" | "related";
+      description: string;
+    }> = [];
+
+    // Pasada ecosystem connections
+    const pasadaProjects = projects.filter((p) =>
+      p.title.toLowerCase().includes("pasada")
+    );
+
+    if (pasadaProjects.length > 1) {
+      // Admin connects to all Pasada apps
+      const admin = pasadaProjects.find((p) => p.title.includes("Admin"));
+      const passenger = pasadaProjects.find((p) => p.title.includes("Passenger"));
+      const driver = pasadaProjects.find((p) => p.title.includes("Driver"));
+      const website = pasadaProjects.find((p) => p.title.includes("Website"));
+
+      if (admin && passenger) {
+        relations.push({
+          from: admin.id,
+          to: passenger.id,
+          type: "parent",
+          description: "Manages user data & analytics",
+        });
+      }
+      if (admin && driver) {
+        relations.push({
+          from: admin.id,
+          to: driver.id,
+          type: "parent",
+          description: "Fleet & quota management",
+        });
+      }
+      if (passenger && driver) {
+        relations.push({
+          from: passenger.id,
+          to: driver.id,
+          type: "sibling",
+          description: "Real-time ride coordination",
+        });
+      }
+      if (website && passenger) {
+        relations.push({
+          from: website.id,
+          to: passenger.id,
+          type: "related",
+          description: "Booking status tracking",
+        });
+      }
+      if (website && driver) {
+        relations.push({
+          from: website.id,
+          to: driver.id,
+          type: "related",
+          description: "Driver info & updates",
+        });
+      }
+      if (website && admin) {
+        relations.push({
+          from: website.id,
+          to: admin.id,
+          type: "related",
+          description: "Public data display",
+        });
+      }
+    }
+
+    // Portfolio lineage
+    const oldPortfolio = projects.find((p) => p.id === "project-fyke");
+    const currentPortfolio = projects.find((p) => p.id === "fykes-laboratory");
+    if (oldPortfolio && currentPortfolio) {
+      relations.push({
+        from: oldPortfolio.id,
+        to: currentPortfolio.id,
+        type: "related",
+        description: "Portfolio evolution",
+      });
+    }
+
+    // Tech stack relationships - Only connect non-Pasada Flutter projects
+    const flutterProjects = projects.filter((p) =>
+      p.tech.some((t) => t.toLowerCase() === "flutter")
+    );
+
+    // Connect Flutter projects only if neither is a Pasada project
+    flutterProjects.forEach((p1, i) => {
+      flutterProjects.slice(i + 1).forEach((p2) => {
+        const p1IsPasada = p1.title.toLowerCase().includes("pasada");
+        const p2IsPasada = p2.title.toLowerCase().includes("pasada");
+        
+        // Skip if either is a Pasada project (they already have explicit connections)
+        if (p1IsPasada || p2IsPasada) return;
+        
+        // Skip if connection already exists
+        if (
+          !relations.some(
+            (r) =>
+              (r.from === p1.id && r.to === p2.id) ||
+              (r.from === p2.id && r.to === p1.id)
+          )
+        ) {
+          relations.push({
+            from: p1.id,
+            to: p2.id,
+            type: "related",
+            description: "Flutter ecosystem",
+          });
+        }
+      });
+    });
+
+    return relations;
+  }, [projects]);
+
+  const activeProject = hoveredProject || selectedProject;
+
+  // Get connected projects
+  const connectedProjects = useMemo(() => {
+    if (!activeProject) return new Set<string>();
+
+    const connected = new Set<string>([activeProject]);
+    relationships.forEach((rel) => {
+      if (rel.from === activeProject) connected.add(rel.to);
+      if (rel.to === activeProject) connected.add(rel.from);
+    });
+
+    return connected;
+  }, [activeProject, relationships]);
+
+  const getNodeColor = (project: ProjectEntry) => {
+    const tier = project.classification.tier;
+    if (tier === "S") return "from-yellow-500 to-orange-600";
+    if (tier === "A") return "from-green-500 to-emerald-600";
+    if (tier === "B") return "from-blue-500 to-cyan-600";
+    if (tier === "C") return "from-purple-500 to-pink-600";
+    return "from-gray-500 to-slate-600";
+  };
+
+  const getConnectionColor = (type: string) => {
+    if (type === "parent") return "stroke-yellow-500";
+    if (type === "sibling") return "stroke-cyan-500";
+    return "stroke-purple-500";
+  };
+
+  return (
+    <div className={cn(panelClass, "overflow-hidden")}>
+      <div className="space-y-4">
+        <div className="flex flex-col gap-1 text-left">
+          <p className="retro text-[0.55rem] uppercase tracking-[0.25em] text-muted-foreground sm:text-[0.6rem]">
+            Project Dependencies Graph
+          </p>
+          <p className="retro text-[0.55rem] leading-relaxed text-muted-foreground">
+            <span className="hidden sm:inline">Hover or tap</span>
+            <span className="sm:hidden">Tap</span> to explore connections between
+            projects.
+          </p>
+        </div>
+
+        {/* Graph Container */}
+        <div className="relative min-h-[350px] overflow-hidden rounded-sm border-2 border-dashed border-border/40 bg-[radial-gradient(circle_at_50%_50%,rgba(var(--primary-rgb,147,51,234),0.03)_0%,transparent_50%)] p-3 sm:min-h-[450px] sm:p-4 dark:border-ring/40">
+          {/* Circuit board grid pattern */}
+          <div
+            className="pointer-events-none absolute inset-0 opacity-10"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(var(--primary-rgb,147,51,234),0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--primary-rgb,147,51,234),0.3) 1px, transparent 1px)",
+              backgroundSize: "20px 20px",
+            }}
+          />
+
+          {/* Connection Lines */}
+          <svg className="pointer-events-none absolute inset-0 h-full w-full">
+            {relationships.map((rel, i) => {
+              const fromIndex = projects.findIndex((p) => p.id === rel.from);
+              const toIndex = projects.findIndex((p) => p.id === rel.to);
+
+              if (fromIndex === -1 || toIndex === -1) return null;
+
+              const isActive =
+                activeProject && (rel.from === activeProject || rel.to === activeProject);
+              const isConnected =
+                activeProject &&
+                connectedProjects.has(rel.from) &&
+                connectedProjects.has(rel.to);
+
+              // Calculate positions (circular layout)
+              const angleFrom = (fromIndex / projects.length) * 2 * Math.PI - Math.PI / 2;
+              const angleTo = (toIndex / projects.length) * 2 * Math.PI - Math.PI / 2;
+
+              const radius = 35; // percentage
+              const centerX = 50;
+              const centerY = 50;
+
+              const x1 = centerX + radius * Math.cos(angleFrom);
+              const y1 = centerY + radius * Math.sin(angleFrom);
+              const x2 = centerX + radius * Math.cos(angleTo);
+              const y2 = centerY + radius * Math.sin(angleTo);
+
+              return (
+                <g key={`${rel.from}-${rel.to}-${i}`}>
+                  <motion.line
+                    x1={`${x1}%`}
+                    y1={`${y1}%`}
+                    x2={`${x2}%`}
+                    y2={`${y2}%`}
+                    strokeWidth={isActive ? 3 : 2}
+                    className={cn(
+                      "transition-all duration-300",
+                      isActive
+                        ? getConnectionColor(rel.type)
+                        : isConnected
+                        ? `${getConnectionColor(rel.type)} opacity-40`
+                        : "stroke-muted-foreground/20"
+                    )}
+                    strokeDasharray={rel.type === "related" ? "5,5" : "none"}
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{
+                      pathLength: 1,
+                      opacity: isActive ? 1 : isConnected ? 0.4 : 0.2,
+                    }}
+                    transition={{ duration: 0.8, delay: i * 0.05 }}
+                  />
+                  {/* Animated particles on active connections */}
+                  {isActive && (
+                    <motion.circle
+                      r="3"
+                      className={cn("fill-current", getConnectionColor(rel.type))}
+                      initial={{ offsetDistance: "0%" }}
+                      animate={{ offsetDistance: "100%" }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
+                    >
+                      <animateMotion dur="2s" repeatCount="indefinite">
+                        <mpath
+                          xlinkHref={`#path-${rel.from}-${rel.to}`}
+                          href={`#path-${rel.from}-${rel.to}`}
+                        />
+                      </animateMotion>
+                    </motion.circle>
+                  )}
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* Project Nodes */}
+          <div className="relative flex flex-wrap items-center justify-center gap-2 p-2 sm:gap-3 sm:p-4">
+            {projects.map((project, index) => {
+              const isActive = activeProject === project.id;
+              const isConnected = connectedProjects.has(project.id);
+              const isHidden = activeProject && !isConnected;
+
+              return (
+                <motion.button
+                  key={project.id}
+                  type="button"
+                  className={cn(
+                    "group relative overflow-hidden rounded-sm border-2 px-3 py-2 text-left shadow-lg transition-all duration-300 touch-manipulation sm:px-4 sm:py-2.5",
+                    isActive
+                      ? "border-primary bg-gradient-to-br shadow-[0_0_20px_var(--primary)] " +
+                          getNodeColor(project)
+                      : isConnected
+                      ? "border-primary/50 bg-background/90 shadow-primary/20 active:bg-primary/10 sm:hover:bg-primary/10"
+                      : "border-border bg-background/80 shadow-border/20 active:border-primary/30 sm:hover:border-primary/30 dark:border-ring"
+                  )}
+                  style={{
+                    opacity: isHidden ? 0.2 : 1,
+                    transform: isActive ? "scale(1.05)" : "scale(1)",
+                  }}
+                  onMouseEnter={() => setHoveredProject(project.id)}
+                  onMouseLeave={() => setHoveredProject(null)}
+                  onTouchStart={() => setHoveredProject(project.id)}
+                  onClick={() =>
+                    setSelectedProject(selectedProject === project.id ? null : project.id)
+                  }
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: isHidden ? 0.2 : 1, scale: isActive ? 1.05 : 1 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                >
+                  {/* Circuit board corner accents */}
+                  <div className="pointer-events-none absolute left-0 top-0 h-2 w-2 border-l-2 border-t-2 border-current opacity-30" />
+                  <div className="pointer-events-none absolute right-0 top-0 h-2 w-2 border-r-2 border-t-2 border-current opacity-30" />
+                  <div className="pointer-events-none absolute bottom-0 left-0 h-2 w-2 border-b-2 border-l-2 border-current opacity-30" />
+                  <div className="pointer-events-none absolute bottom-0 right-0 h-2 w-2 border-b-2 border-r-2 border-current opacity-30" />
+
+                  <div className="relative z-10">
+                    <p
+                      className={cn(
+                        "retro text-[0.5rem] uppercase tracking-[0.2em] sm:text-[0.6rem]",
+                        isActive ? "text-white" : "text-muted-foreground"
+                      )}
+                    >
+                      Tier {project.classification.tier}
+                    </p>
+                    <p
+                      className={cn(
+                        "retro mt-0.5 text-xs font-bold uppercase tracking-wide sm:text-sm",
+                        isActive ? "text-white" : "text-foreground"
+                      )}
+                    >
+                      {project.title}
+                    </p>
+                  </div>
+
+                  {/* Pulse effect for active node */}
+                  {isActive && (
+                    <motion.div
+                      className="absolute inset-0 rounded-sm bg-primary/20"
+                      animate={{ opacity: [0.5, 0, 0.5] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                  )}
+                </motion.button>
+              );
+            })}
+          </div>
+
+          {/* Info Panel */}
+          <AnimatePresence>
+            {activeProject && (
+              <motion.div
+                className="absolute bottom-2 left-2 right-2 rounded-sm border-2 border-primary/60 bg-card/95 p-2 backdrop-blur-sm sm:bottom-4 sm:left-4 sm:right-4 sm:p-3"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1">
+                    <p className="retro text-xs font-bold text-primary sm:text-sm">
+                      {projects.find((p) => p.id === activeProject)?.title}
+                    </p>
+                    <p className="retro mt-1 text-[0.45rem] text-muted-foreground sm:text-[0.5rem]">
+                      Connected to {connectedProjects.size - 1} project(s)
+                    </p>
+                    <div className="mt-2 space-y-1">
+                      {relationships
+                        .filter(
+                          (r) => r.from === activeProject || r.to === activeProject
+                        )
+                        .map((rel) => {
+                          const otherId =
+                            rel.from === activeProject ? rel.to : rel.from;
+                          const other = projects.find((p) => p.id === otherId);
+                          return (
+                            <div
+                              key={`${rel.from}-${rel.to}`}
+                              className="flex items-center gap-1.5"
+                            >
+                              <div
+                                className={cn(
+                                  "size-2 rounded-full",
+                                  rel.type === "parent"
+                                    ? "bg-yellow-500"
+                                    : rel.type === "sibling"
+                                    ? "bg-cyan-500"
+                                    : "bg-purple-500"
+                                )}
+                              />
+                              <span className="retro text-[0.4rem] text-foreground sm:text-[0.45rem]">
+                                {other?.title}: {rel.description}
+                              </span>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedProject(null);
+                      setHoveredProject(null);
+                    }}
+                    className="retro flex size-5 shrink-0 items-center justify-center rounded-sm border border-border bg-background text-[0.6rem] touch-manipulation active:bg-primary/20 sm:size-6 sm:text-xs sm:hover:bg-primary/20 dark:border-ring"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Legend - Below Graph */}
+        <div className="mt-3 flex justify-center">
+          <div className="inline-flex items-center gap-3 rounded-sm border border-border/60 bg-background/80 px-3 py-2 backdrop-blur-sm dark:border-ring/60 sm:gap-4 sm:px-4">
+            <p className="retro text-[0.4rem] uppercase tracking-[0.2em] text-muted-foreground sm:text-[0.45rem]">
+              Connection Types:
+            </p>
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="flex items-center gap-1">
+                <div className="h-px w-3 bg-yellow-500" />
+                <span className="retro text-[0.35rem] text-foreground sm:text-[0.4rem]">
+                  Parent
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="h-px w-3 bg-cyan-500" />
+                <span className="retro text-[0.35rem] text-foreground sm:text-[0.4rem]">
+                  Sibling
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="h-px w-3 border-t border-dashed border-purple-500" />
+                <span className="retro text-[0.35rem] text-foreground sm:text-[0.4rem]">
+                  Related
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const TechStackConstellation = ({ 
   projects, 
   panelClass 
@@ -1815,6 +2250,9 @@ export default function ProjectsPage() {
             </div>
           </div>
         </div>
+
+        {/* Project Dependencies Graph */}
+        <ProjectDependenciesGraph projects={sortedProjects} panelClass={panelBaseClass} />
 
         {/* Tech Stack Constellation - Between Matrix and Accordions */}
         <TechStackConstellation projects={sortedProjects} panelClass={panelBaseClass} />
