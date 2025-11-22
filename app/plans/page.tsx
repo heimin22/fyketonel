@@ -3,6 +3,7 @@
 import { useMediaQuery } from "react-responsive";
 import QuestLog from "@/components/quest-log";
 import LaboratoryExperimentsLog from "@/components/laboratory-experiments-log";
+import ChaosMeterDashboard from "@/components/chaos-meter-dashboard";
 
 export default function PlansPage() {
   // Detect screen sizes
@@ -51,6 +52,13 @@ export default function PlansPage() {
         className={`${shellClass} border-dashed border-foreground/50 dark:border-ring/50`}
       >
         <LaboratoryExperimentsLog />
+      </section>
+
+      {/* Chaos Meter */}
+      <section
+        className={`${shellClass} border-dashed border-foreground/50 dark:border-ring/50`}
+      >
+        <ChaosMeterDashboard />
       </section>
 
       {/* Additional Info Section */}
