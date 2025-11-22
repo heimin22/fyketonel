@@ -19,6 +19,7 @@ import ContactForm from "@/components/contact-form";
 import PowerPelletHighway from "@/components/power-pellet-highway";
 import AchievementWall from "@/components/achievement-wall";
 import InventorySystem from "@/components/inventory-system";
+import SkillTree from "@/components/skill-tree";
 import { useMediaQuery } from "react-responsive";
 import { useState, useEffect } from "react";
 
@@ -262,6 +263,8 @@ export default function Home() {
       <AchievementWall />
 
       <InventorySystem />
+
+      <SkillTree />
 
       <TechnologiesCarousel />
 

@@ -2,6 +2,7 @@
 
 import { useMediaQuery } from "react-responsive";
 import QuestLog from "@/components/quest-log";
+import LaboratoryExperimentsLog from "@/components/laboratory-experiments-log";
 
 export default function PlansPage() {
   // Detect screen sizes
@@ -43,6 +44,13 @@ export default function PlansPage() {
           Active Quest Log
         </p>
         <QuestLog />
+      </section>
+
+      {/* Laboratory Experiments */}
+      <section
+        className={`${shellClass} border-dashed border-foreground/50 dark:border-ring/50`}
+      >
+        <LaboratoryExperimentsLog />
       </section>
 
       {/* Additional Info Section */}
