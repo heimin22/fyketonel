@@ -1242,6 +1242,50 @@ const ProjectDependenciesGraph = ({
           </p>
         </div>
 
+        {/* Project Controls */}
+        <div className="flex flex-wrap items-center justify-center gap-2 rounded-sm border border-dashed border-border/40 bg-background/60 p-2 sm:gap-3 sm:p-3 dark:border-ring/40">
+          {projects.map((project, index) => {
+            const isActive = activeProject === project.id;
+            const isConnected = connectedProjects.has(project.id);
+            const isHidden = activeProject && !isConnected;
+
+            return (
+              <motion.button
+                key={project.id}
+                type="button"
+                className={cn(
+                  "retro rounded-sm border-2 px-3 py-1 text-[0.5rem] uppercase tracking-[0.18em] transition-all duration-300 sm:text-[0.55rem]",
+                  isActive
+                    ? "border-primary bg-primary text-primary-foreground shadow-[0_0_12px_var(--primary)]"
+                    : isConnected
+                    ? "border-primary/70 bg-primary/20 text-foreground active:bg-primary/40 sm:hover:bg-primary/30"
+                    : "border-border bg-background/80 text-foreground active:border-primary/50 active:bg-primary/10 sm:hover:border-primary/50 sm:hover:bg-primary/10 dark:border-ring"
+                )}
+                style={{
+                  opacity: isHidden ? 0.35 : 1,
+                  transform: isActive ? "scale(1.05)" : "scale(1)",
+                }}
+                onMouseEnter={() => setHoveredProject(project.id)}
+                onMouseLeave={() => setHoveredProject(null)}
+                onTouchStart={() => setHoveredProject(project.id)}
+                onClick={() =>
+                  setSelectedProject(selectedProject === project.id ? null : project.id)
+                }
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{
+                  opacity: isHidden ? 0.35 : 1,
+                  scale: isActive ? 1.05 : 1,
+                }}
+                transition={{ duration: 0.3, delay: index * 0.02 }}
+              >
+                {project.title}
+              </motion.button>
+            );
+          })}
+        </div>
+
         {/* Graph Container */}
         <div className="relative min-h-[350px] overflow-hidden rounded-sm border-2 border-dashed border-border/40 bg-[radial-gradient(circle_at_50%_50%,rgba(var(--primary-rgb,147,51,234),0.03)_0%,transparent_50%)] p-3 sm:min-h-[450px] sm:p-4 dark:border-ring/40">
           {/* Circuit board grid pattern */}
@@ -1333,75 +1377,36 @@ const ProjectDependenciesGraph = ({
           </svg>
 
           {/* Project Nodes */}
-          <div className="relative flex flex-wrap items-center justify-center gap-2 p-2 sm:gap-3 sm:p-4">
+          <div className="pointer-events-none absolute inset-0">
             {projects.map((project, index) => {
+              const angle = (index / projects.length) * 2 * Math.PI - Math.PI / 2;
+              const radius = 35;
+              const centerX = 50;
+              const centerY = 50;
+              const x = centerX + radius * Math.cos(angle);
+              const y = centerY + radius * Math.sin(angle);
               const isActive = activeProject === project.id;
               const isConnected = connectedProjects.has(project.id);
-              const isHidden = activeProject && !isConnected;
+              const gradient = getNodeColor(project);
 
               return (
-                <motion.button
-                  key={project.id}
-                  type="button"
+                <div
+                  key={`node-${project.id}`}
                   className={cn(
-                    "group relative overflow-hidden rounded-sm border-2 px-3 py-2 text-left shadow-lg transition-all duration-300 touch-manipulation sm:px-4 sm:py-2.5",
+                    "absolute size-3 rounded-full border-2 transition-all duration-300",
                     isActive
-                      ? "border-primary bg-gradient-to-br shadow-[0_0_20px_var(--primary)] " +
-                          getNodeColor(project)
+                      ? "border-primary bg-primary shadow-[0_0_12px_var(--primary)]"
                       : isConnected
-                      ? "border-primary/50 bg-background/90 shadow-primary/20 active:bg-primary/10 sm:hover:bg-primary/10"
-                      : "border-border bg-background/80 shadow-border/20 active:border-primary/30 sm:hover:border-primary/30 dark:border-ring"
+                      ? "border-primary/70 bg-primary/30"
+                      : "border-muted-foreground/40 bg-muted-foreground/20"
                   )}
                   style={{
-                    opacity: isHidden ? 0.2 : 1,
-                    transform: isActive ? "scale(1.05)" : "scale(1)",
+                    left: `calc(${x}% - 8px)`,
+                    top: `calc(${y}% - 8px)`,
+                    backgroundImage: isActive ? undefined : `linear-gradient(to bottom right, var(--tw-gradient-from), var(--tw-gradient-to))`,
                   }}
-                  onMouseEnter={() => setHoveredProject(project.id)}
-                  onMouseLeave={() => setHoveredProject(null)}
-                  onTouchStart={() => setHoveredProject(project.id)}
-                  onClick={() =>
-                    setSelectedProject(selectedProject === project.id ? null : project.id)
-                  }
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: isHidden ? 0.2 : 1, scale: isActive ? 1.05 : 1 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                >
-                  {/* Circuit board corner accents */}
-                  <div className="pointer-events-none absolute left-0 top-0 h-2 w-2 border-l-2 border-t-2 border-current opacity-30" />
-                  <div className="pointer-events-none absolute right-0 top-0 h-2 w-2 border-r-2 border-t-2 border-current opacity-30" />
-                  <div className="pointer-events-none absolute bottom-0 left-0 h-2 w-2 border-b-2 border-l-2 border-current opacity-30" />
-                  <div className="pointer-events-none absolute bottom-0 right-0 h-2 w-2 border-b-2 border-r-2 border-current opacity-30" />
-
-                  <div className="relative z-10">
-                    <p
-                      className={cn(
-                        "retro text-[0.5rem] uppercase tracking-[0.2em] sm:text-[0.6rem]",
-                        isActive ? "text-white" : "text-muted-foreground"
-                      )}
-                    >
-                      Tier {project.classification.tier}
-                    </p>
-                    <p
-                      className={cn(
-                        "retro mt-0.5 text-xs font-bold uppercase tracking-wide sm:text-sm",
-                        isActive ? "text-white" : "text-foreground"
-                      )}
-                    >
-                      {project.title}
-                    </p>
-                  </div>
-
-                  {/* Pulse effect for active node */}
-                  {isActive && (
-                    <motion.div
-                      className="absolute inset-0 rounded-sm bg-primary/20"
-                      animate={{ opacity: [0.5, 0, 0.5] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    />
-                  )}
-                </motion.button>
+                  data-gradient={gradient}
+                />
               );
             })}
           </div>
@@ -1617,6 +1622,59 @@ const TechStackConstellation = ({
           </p>
         </div>
 
+        {/* Tech Stack Controls */}
+        <div className="flex flex-wrap items-center justify-center gap-2 rounded-sm border border-dashed border-border/40 bg-background/60 p-2 sm:gap-3 sm:p-3 dark:border-ring/40">
+          {techData.map((tech, index) => {
+            const isActive = activeTech === tech.name;
+            const isConnected = connectedTechs.has(tech.name);
+            const isHidden = activeTech && !isConnected;
+
+            return (
+              <motion.button
+                key={tech.name}
+                type="button"
+                className={cn(
+                  "retro rounded-sm border-2 transition-all duration-300 touch-manipulation",
+                  getTechSize(tech.count),
+                  isActive
+                    ? cn(
+                        "border-primary bg-primary text-primary-foreground",
+                        getTechGlow(tech.count)
+                      )
+                    : isConnected
+                    ? "border-primary/70 bg-primary/20 text-foreground active:bg-primary/40 sm:hover:bg-primary/30"
+                    : "border-border bg-background/80 text-foreground active:border-primary/50 active:bg-primary/10 sm:hover:border-primary/50 sm:hover:bg-primary/10 dark:border-ring"
+                )}
+                style={{
+                  opacity: isHidden ? 0.35 : 1,
+                  transform: isActive ? "scale(1.05)" : "scale(1)",
+                }}
+                onMouseEnter={() => setHoveredTech(tech.name)}
+                onMouseLeave={() => setHoveredTech(null)}
+                onTouchStart={() => setHoveredTech(tech.name)}
+                onClick={() =>
+                  setSelectedTech(selectedTech === tech.name ? null : tech.name)
+                }
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{
+                  opacity: isHidden ? 0.35 : 1,
+                  scale: isActive ? 1.05 : 1,
+                }}
+                transition={{ duration: 0.3, delay: index * 0.02 }}
+              >
+                <span className="text-[0.55rem] sm:text-[0.6rem] md:text-[0.7rem]">
+                  {tech.name}
+                </span>
+                <span className="ml-1 text-[0.45rem] opacity-70 sm:ml-1.5 sm:text-[0.5rem]">
+                  ×{tech.count}
+                </span>
+              </motion.button>
+            );
+          })}
+        </div>
+
         {/* Constellation Container */}
         <div className="relative min-h-[300px] overflow-hidden rounded-sm border-2 border-dashed border-border/40 bg-gradient-to-b from-background via-background/50 to-background p-3 sm:min-h-[400px] sm:p-4 dark:border-ring/40">
           {/* Background stars effect */}
@@ -1696,105 +1754,92 @@ const TechStackConstellation = ({
           </svg>
 
           {/* Tech Stack Nodes */}
-          <div className="relative flex flex-wrap items-center justify-center gap-2 p-2 sm:gap-3 sm:p-4">
+          <div className="pointer-events-none absolute inset-0">
             {techData.map((tech, index) => {
+              const angle = (index / techData.length) * 2 * Math.PI;
+              const radius = 40;
+              const centerX = 50;
+              const centerY = 50;
+              const x = centerX + radius * Math.cos(angle);
+              const y = centerY + radius * Math.sin(angle);
               const isActive = activeTech === tech.name;
               const isConnected = connectedTechs.has(tech.name);
-              const isHidden = activeTech && !isConnected;
 
               return (
-                <motion.button
-                  key={tech.name}
-                  type="button"
+                <div
+                  key={`${tech.name}-node`}
                   className={cn(
-                    "retro rounded-sm border-2 transition-all duration-300 touch-manipulation",
-                    getTechSize(tech.count),
+                    "absolute size-2 rounded-full border-2 transition-all duration-300",
                     isActive
-                      ? cn(
-                          "border-primary bg-primary text-primary-foreground",
-                          getTechGlow(tech.count)
-                        )
+                      ? "border-primary bg-primary shadow-[0_0_12px_var(--primary)]"
                       : isConnected
-                      ? "border-primary/70 bg-primary/20 text-foreground active:bg-primary/40 sm:hover:bg-primary/30"
-                      : "border-border bg-background/80 text-foreground active:border-primary/50 active:bg-primary/10 sm:hover:border-primary/50 sm:hover:bg-primary/10 dark:border-ring"
+                      ? "border-primary/70 bg-primary/30"
+                      : "border-muted-foreground/50 bg-muted-foreground/20"
                   )}
                   style={{
-                    opacity: isHidden ? 0.2 : 1,
-                    transform: isActive ? "scale(1.1)" : "scale(1)",
+                    left: `calc(${x}% - 6px)`,
+                    top: `calc(${y}% - 6px)`,
                   }}
-                  onMouseEnter={() => setHoveredTech(tech.name)}
-                  onMouseLeave={() => setHoveredTech(null)}
-                  onTouchStart={() => setHoveredTech(tech.name)}
-                  onClick={() => setSelectedTech(selectedTech === tech.name ? null : tech.name)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: isHidden ? 0.2 : 1, scale: isActive ? 1.1 : 1 }}
-                  transition={{ duration: 0.3, delay: index * 0.03 }}
-                >
-                  <span className="text-[0.55rem] sm:text-[0.6rem] md:text-[0.7rem]">
-                    {tech.name}
-                  </span>
-                  <span className="ml-1 text-[0.45rem] opacity-70 sm:ml-1.5 sm:text-[0.5rem]">
-                    ×{tech.count}
-                  </span>
-                </motion.button>
+                />
               );
             })}
           </div>
 
-          {/* Info Panel */}
-          <AnimatePresence>
-            {activeTech && (
-              <motion.div
-                className="absolute bottom-2 left-2 right-2 rounded-sm border-2 border-primary/60 bg-card/95 p-2 backdrop-blur-sm sm:bottom-4 sm:left-4 sm:right-4 sm:p-3"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 overflow-hidden">
-                    <p className="retro text-xs font-bold text-primary sm:text-sm">
-                      {activeTech}
-                    </p>
-                    <p className="retro mt-0.5 text-[0.45rem] text-muted-foreground sm:mt-1 sm:text-[0.5rem]">
-                      Used in {techData.find((t) => t.name === activeTech)?.count} project(s)
-                    </p>
-                    <div className="mt-1.5 flex flex-wrap gap-1 sm:mt-2">
-                      {techData
-                        .find((t) => t.name === activeTech)
-                        ?.projects.slice(0, 6)
-                        .map((project) => (
-                          <span
-                            key={project}
-                            className="retro rounded-sm bg-primary/20 px-1.5 py-0.5 text-[0.4rem] leading-tight text-foreground sm:px-2 sm:text-[0.45rem]"
-                          >
-                            {project}
-                          </span>
-                        ))}
-                      {(techData.find((t) => t.name === activeTech)?.projects.length ?? 0) > 6 && (
-                        <span className="retro rounded-sm bg-primary/20 px-1.5 py-0.5 text-[0.4rem] leading-tight text-foreground/70 sm:px-2 sm:text-[0.45rem]">
-                          +{(techData.find((t) => t.name === activeTech)?.projects.length ?? 0) - 6}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedTech(null);
-                      setHoveredTech(null);
-                    }}
-                    className="retro flex size-5 shrink-0 items-center justify-center rounded-sm border border-border bg-background text-[0.6rem] touch-manipulation active:bg-primary/20 sm:size-6 sm:text-xs sm:hover:bg-primary/20 dark:border-ring"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
+
+        {/* Info Panel */}
+        <AnimatePresence>
+          {activeTech && (
+            <motion.div
+              className="rounded-sm border-2 border-primary/60 bg-card/95 p-3 shadow-[2px_2px_0_var(--border)] backdrop-blur-sm"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 overflow-hidden">
+                  <p className="retro text-xs font-bold text-primary sm:text-sm">
+                    {activeTech}
+                  </p>
+                  <p className="retro mt-0.5 text-[0.45rem] text-muted-foreground sm:mt-1 sm:text-[0.5rem]">
+                    Used in {techData.find((t) => t.name === activeTech)?.count} project
+                    {(techData.find((t) => t.name === activeTech)?.count ?? 0) === 1 ? "" : "s"}
+                  </p>
+                  <div className="mt-1.5 flex flex-wrap gap-1 sm:mt-2">
+                    {techData
+                      .find((t) => t.name === activeTech)
+                      ?.projects.slice(0, 6)
+                      .map((project) => (
+                        <span
+                          key={project}
+                          className="retro rounded-sm bg-primary/20 px-1.5 py-0.5 text-[0.4rem] leading-tight text-foreground sm:px-2 sm:text-[0.45rem]"
+                        >
+                          {project}
+                        </span>
+                      ))}
+                    {(techData.find((t) => t.name === activeTech)?.projects.length ?? 0) > 6 && (
+                      <span className="retro rounded-sm bg-primary/20 px-1.5 py-0.5 text-[0.4rem] leading-tight text-foreground/70 sm:px-2 sm:text-[0.45rem]">
+                        +
+                        {(techData.find((t) => t.name === activeTech)?.projects.length ?? 0) - 6}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedTech(null);
+                    setHoveredTech(null);
+                  }}
+                  className="retro flex size-6 shrink-0 items-center justify-center rounded-sm border border-border bg-background text-[0.6rem] touch-manipulation active:bg-primary/20 sm:text-xs sm:hover:bg-primary/20 dark:border-ring"
+                >
+                  ✕
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
