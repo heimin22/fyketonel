@@ -470,7 +470,7 @@ export function RetroTerminal() {
     }
   }, [currentTheme, resolvedTheme]);
 
-  // Commands definition
+  // Commands definition (with access to state via closures)
   const commands: Record<string, Command> = {
     help: {
       name: "help",
@@ -495,6 +495,7 @@ export function RetroTerminal() {
         { type: "output", content: "                      gameboy/softpop" },
         { type: "output", content: "  shout [text]      - Shout back the text with data type and arithmetic support" },
         { type: "output", content: "  date              - Display current date/time" },
+        { type: "output", content: "  fastfetch         - Display system information" },
         { type: "output", content: "" },
         { type: "success", content: "Use ↑/↓ arrows to navigate command history" },
         { type: "success", content: "Press Tab for autocomplete" },
@@ -846,6 +847,73 @@ export function RetroTerminal() {
             }),
           },
         ];
+      },
+    },
+    fastfetch: {
+      name: "fastfetch",
+      description: "Display system information",
+      execute: () => {
+        const output: TerminalLine[] = [];
+        
+        // Get browser/system information
+        const userAgent = typeof navigator !== "undefined" ? navigator.userAgent : "";
+        const platform = typeof navigator !== "undefined" ? navigator.platform : "Unknown";
+        const language = typeof navigator !== "undefined" ? navigator.language : "Unknown";
+        const screenWidth = typeof window !== "undefined" ? window.screen.width : 0;
+        const screenHeight = typeof window !== "undefined" ? window.screen.height : 0;
+        const now = new Date();
+        
+        // Detect browser
+        let browser = "Unknown";
+        if (userAgent.includes("Chrome") && !userAgent.includes("Edg")) browser = "Chrome";
+        else if (userAgent.includes("Firefox")) browser = "Firefox";
+        else if (userAgent.includes("Safari") && !userAgent.includes("Chrome")) browser = "Safari";
+        else if (userAgent.includes("Edg")) browser = "Edge";
+        else if (userAgent.includes("Opera")) browser = "Opera";
+        
+        // Set OS to ORPHEUS
+        const os = "ORPHEUS";
+        
+        // ASCII art banner - Eye
+        output.push({ type: "output", content: "" });
+        output.push({ type: "output", content: "          ╔═══════════════════════╗" });
+        output.push({ type: "output", content: "         ║                       ║" });
+        output.push({ type: "output", content: "        ║    ╔═══════════════╗    ║" });
+        output.push({ type: "output", content: "       ║    ║               ║    ║" });
+        output.push({ type: "output", content: "      ║    ║   ╔═══════╗   ║    ║" });
+        output.push({ type: "output", content: "     ║    ║   ║       ║   ║    ║" });
+        output.push({ type: "output", content: "    ║    ║   ║   ●   ║   ║    ║" });
+        output.push({ type: "output", content: "     ║    ║   ║       ║   ║    ║" });
+        output.push({ type: "output", content: "      ║    ║   ╚═══════╝   ║    ║" });
+        output.push({ type: "output", content: "       ║    ║               ║    ║" });
+        output.push({ type: "output", content: "        ║    ╚═══════════════╝    ║" });
+        output.push({ type: "output", content: "         ║                       ║" });
+        output.push({ type: "output", content: "          ╚═══════════════════════╝" });
+        output.push({ type: "output", content: "" });
+        output.push({ type: "output", content: "╔════════════════════════════════════════════════╗" });
+        output.push({ type: "output", content: "║          SYSTEM INFORMATION                    ║" });
+        output.push({ type: "output", content: "╚════════════════════════════════════════════════╝" });
+        output.push({ type: "output", content: "" });
+        output.push({ type: "output", content: `  OS          ${os}` });
+        output.push({ type: "output", content: `  Platform    ${platform}` });
+        output.push({ type: "output", content: `  Browser     ${browser}` });
+        output.push({ type: "output", content: `  Language    ${language}` });
+        output.push({ type: "output", content: `  Resolution  ${screenWidth}x${screenHeight}` });
+        output.push({ type: "output", content: `  Time        ${now.toLocaleTimeString()}` });
+        output.push({ type: "output", content: `  Date        ${now.toLocaleDateString()}` });
+        output.push({ type: "output", content: "" });
+        output.push({ type: "output", content: "╔════════════════════════════════════════════════╗" });
+        output.push({ type: "output", content: "║          TERMINAL INFO                        ║" });
+        output.push({ type: "output", content: "╚════════════════════════════════════════════════╝" });
+        output.push({ type: "output", content: "" });
+        output.push({ type: "output", content: `  Terminal    TERMINAL ORPHEUS v1.0.0` });
+        output.push({ type: "output", content: `  Theme       ${themes[currentTheme as keyof typeof themes].name}` });
+        output.push({ type: "output", content: `  Lines       ${lines.length}` });
+        output.push({ type: "output", content: `  History     ${history.length} commands` });
+        output.push({ type: "output", content: "" });
+        output.push({ type: "success", content: "System information retrieved successfully" });
+        
+        return output;
       },
     },
   };
