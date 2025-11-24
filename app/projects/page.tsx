@@ -2373,6 +2373,9 @@ export default function ProjectsPage() {
         <RetroVisitorCounter />
       </section>
 
+      {/* TERMINAL ORPHEUS - Positioned for visibility */}
+      <RetroTerminal />
+
       <section
         id="archive-container"
         className={cn(
@@ -2511,9 +2514,6 @@ export default function ProjectsPage() {
 
         {/* Tech Stack Constellation - Between Matrix and Accordions */}
         <TechStackConstellation projects={sortedProjects} panelClass={panelBaseClass} />
-
-        {/* Retro Terminal */}
-        <RetroTerminal />
 
         <div className={cn(panelBaseClass, "p-0 sm:p-0 md:p-0 lg:p-0")}>
           {filteredProjects.length > 0 ? (

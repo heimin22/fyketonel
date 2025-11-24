@@ -17,11 +17,47 @@ interface Command {
   execute: (args: string[]) => TerminalLine[];
 }
 
+// Theme configurations
+const themes = {
+  default: {
+    name: "Default",
+    class: "theme-default"
+  },
+  atari: {
+    name: "Atari",
+    class: "theme-atari"
+  },
+  nintendo: {
+    name: "Nintendo",
+    class: "theme-nintendo"
+  },
+  vhs: {
+    name: "VHS",
+    class: "theme-vhs"
+  },
+  gameboy: {
+    name: "Gameboy", 
+    class: "theme-gameboy"
+  },
+  softpop: {
+    name: "Soft-pop",
+    class: "theme-softpop"
+  }
+};
+
 export function RetroTerminal() {
   const [lines, setLines] = useState<TerminalLine[]>([
     {
       type: "success",
-      content: "Welcome to FYKE TERMINAL v1.0.0",
+      content: "╔════════════════════════════════════════════════╗",
+    },
+    {
+      type: "success",
+      content: "║       TERMINAL ORPHEUS v1.0.0                  ║",
+    },
+    {
+      type: "success",
+      content: "╚════════════════════════════════════════════════╝",
     },
     {
       type: "output",
@@ -33,6 +69,7 @@ export function RetroTerminal() {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState("default");
   const inputRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
 
@@ -42,6 +79,19 @@ export function RetroTerminal() {
       outputRef.current.scrollTop = outputRef.current.scrollHeight;
     }
   }, [lines]);
+
+  // Apply theme to document root
+  useEffect(() => {
+    const html = document.documentElement;
+    // Remove all theme classes
+    Object.values(themes).forEach(theme => {
+      html.classList.remove(theme.class);
+    });
+    // Add current theme class if not default
+    if (currentTheme !== "default") {
+      html.classList.add(themes[currentTheme as keyof typeof themes].class);
+    }
+  }, [currentTheme]);
 
   // Commands definition
   const commands: Record<string, Command> = {
@@ -53,18 +103,24 @@ export function RetroTerminal() {
         { type: "output", content: "║          AVAILABLE COMMANDS                    ║" },
         { type: "output", content: "╚════════════════════════════════════════════════╝" },
         { type: "output", content: "" },
-        { type: "output", content: "  help          - Show this help message" },
-        { type: "output", content: "  ls            - List portfolio sections" },
-        { type: "output", content: "  projects      - Show all projects" },
-        { type: "output", content: "  whoami        - Display portfolio owner info" },
-        { type: "output", content: "  skills        - List technology stack" },
-        { type: "output", content: "  contact       - Show contact information" },
-        { type: "output", content: "  clear         - Clear terminal output" },
-        { type: "output", content: "  theme         - Toggle dark/light mode" },
-        { type: "output", content: "  echo [text]   - Echo back the text" },
-        { type: "output", content: "  date          - Display current date/time" },
+        { type: "output", content: "  help              - Show this help message" },
+        { type: "output", content: "  ls                - List portfolio sections" },
+        { type: "output", content: "  projects          - Show all projects" },
+        { type: "output", content: "  whoami [flags]    - Display portfolio owner info" },
+        { type: "output", content: "                      --name, --location, --school, --age" },
+        { type: "output", content: "  skills [flags]    - List technology stack" },
+        { type: "output", content: "                      --frontend, --backend, --database," },
+        { type: "output", content: "                      --tools, --languages" },
+        { type: "output", content: "  contact           - Show contact information" },
+        { type: "output", content: "  clear             - Clear terminal output" },
+        { type: "output", content: "  theme [name]      - Change color theme" },
+        { type: "output", content: "                      default/atari/nintendo/vhs/" },
+        { type: "output", content: "                      gameboy/softpop" },
+        { type: "output", content: "  echo [text]       - Echo back the text" },
+        { type: "output", content: "  date              - Display current date/time" },
         { type: "output", content: "" },
         { type: "success", content: "Use ↑/↓ arrows to navigate command history" },
+        { type: "success", content: "Press Tab for autocomplete" },
       ],
     },
     ls: {
@@ -100,35 +156,84 @@ export function RetroTerminal() {
     whoami: {
       name: "whoami",
       description: "Display portfolio owner info",
-      execute: () => [
-        { type: "output", content: "╔════════════════════════════════════════════════╗" },
-        { type: "output", content: "║          SYSTEM OPERATOR                       ║" },
-        { type: "output", content: "╚════════════════════════════════════════════════╝" },
-        { type: "output", content: "" },
-        { type: "output", content: "  Name:     Fyke" },
-        { type: "output", content: "  Role:     Full-Stack Developer" },
-        { type: "output", content: "  Status:   Building awesome projects" },
-        { type: "output", content: "  Location: Digital realm" },
-        { type: "output", content: "" },
-        { type: "success", content: "Passionate about creating innovative solutions" },
-      ],
+      execute: (args) => {
+        const showName = args.length === 0 || args.includes("--name");
+        const showLocation = args.length === 0 || args.includes("--location");
+        const showSchool = args.length === 0 || args.includes("--school");
+        const showAge = args.length === 0 || args.includes("--age");
+        
+        const output: TerminalLine[] = [
+          { type: "output", content: "╔════════════════════════════════════════════════╗" },
+          { type: "output", content: "║          SYSTEM OPERATOR                       ║" },
+          { type: "output", content: "╚════════════════════════════════════════════════╝" },
+          { type: "output", content: "" },
+        ];
+
+        if (showName) {
+          output.push({ type: "output", content: "  Name:     Fyke Simon V. Tonel" });
+        }
+        if (showLocation) {
+          output.push({ type: "output", content: "  Location: Metro Manila, Philippines" });
+        }
+        if (showSchool) {
+          output.push({ type: "output", content: "  School:   STI College Caloocan" });
+        }
+        if (showAge) {
+          output.push({ type: "output", content: "  Age:      21 years old" });
+        }
+
+        output.push({ type: "output", content: "" });
+        output.push({ type: "success", content: "Full-Stack Developer | Building awesome projects" });
+        
+        return output;
+      },
     },
     skills: {
       name: "skills",
       description: "List technology stack",
-      execute: () => [
-        { type: "output", content: "╔════════════════════════════════════════════════╗" },
-        { type: "output", content: "║          TECH STACK INVENTORY                  ║" },
-        { type: "output", content: "╚════════════════════════════════════════════════╝" },
-        { type: "output", content: "" },
-        { type: "output", content: "  Frontend:    React, Next.js, TypeScript" },
-        { type: "output", content: "  Styling:     Tailwind CSS, Framer Motion" },
-        { type: "output", content: "  Backend:     Node.js, Python" },
-        { type: "output", content: "  Database:    PostgreSQL, MongoDB" },
-        { type: "output", content: "  Tools:       Git, Docker, VS Code" },
-        { type: "output", content: "" },
-        { type: "success", content: "Always learning and expanding the arsenal" },
-      ],
+      execute: (args) => {
+        const showFrontend = args.length === 0 || args.includes("--frontend");
+        const showBackend = args.length === 0 || args.includes("--backend");
+        const showDatabase = args.length === 0 || args.includes("--database");
+        const showTools = args.length === 0 || args.includes("--tools");
+        const showLanguages = args.length === 0 || args.includes("--languages");
+
+        const output: TerminalLine[] = [
+          { type: "output", content: "╔════════════════════════════════════════════════╗" },
+          { type: "output", content: "║          TECH STACK INVENTORY                  ║" },
+          { type: "output", content: "╚════════════════════════════════════════════════╝" },
+          { type: "output", content: "" },
+        ];
+
+        if (showLanguages) {
+          output.push({ type: "output", content: "  Languages:   TypeScript, JavaScript, Dart," });
+          output.push({ type: "output", content: "               PL/pgSQL, SQL" });
+        }
+        if (showFrontend) {
+          output.push({ type: "output", content: "  Frontend:    React, Next.js, Remix, Flutter," });
+          output.push({ type: "output", content: "               Tailwind CSS, Three.js" });
+        }
+        if (showBackend) {
+          output.push({ type: "output", content: "  Backend:     Node.js, Express.js, Bun" });
+        }
+        if (showDatabase) {
+          output.push({ type: "output", content: "  Database:    PostgreSQL, MySQL, SQLite," });
+          output.push({ type: "output", content: "               Firebase, Supabase, QuestDB" });
+        }
+        if (showTools) {
+          output.push({ type: "output", content: "  DevOps:      Docker, Git, GitHub, GitLab" });
+          output.push({ type: "output", content: "  Cloud:       GCP, Cloudflare" });
+          output.push({ type: "output", content: "  Editors:     VS Code, Neovim, Zed," });
+          output.push({ type: "output", content: "               Android Studio" });
+          output.push({ type: "output", content: "  OS:          ArchLinux, Linux, Windows" });
+          output.push({ type: "output", content: "  Package:     npm, pnpm, Bun" });
+        }
+
+        output.push({ type: "output", content: "" });
+        output.push({ type: "success", content: "Always learning and expanding the arsenal" });
+
+        return output;
+      },
     },
     contact: {
       name: "contact",
@@ -138,8 +243,9 @@ export function RetroTerminal() {
         { type: "output", content: "║          CONTACT CHANNELS                      ║" },
         { type: "output", content: "╚════════════════════════════════════════════════╝" },
         { type: "output", content: "" },
-        { type: "output", content: "  GitHub:   github.com/heimin22/fyketonel" },
-        { type: "output", content: "  Email:    Available on request" },
+        { type: "output", content: "  GitHub:   github.com/heimin22" },
+        { type: "output", content: "  Email:    Available on contact form" },
+        { type: "output", content: "  Location: Metro Manila, Philippines" },
         { type: "output", content: "" },
         { type: "success", content: "Let's build something amazing together!" },
       ],
@@ -154,22 +260,46 @@ export function RetroTerminal() {
     },
     theme: {
       name: "theme",
-      description: "Toggle dark/light mode",
-      execute: () => {
-        // Toggle theme
-        const html = document.documentElement;
-        const isDark = html.classList.contains("dark");
-        if (isDark) {
-          html.classList.remove("dark");
-        } else {
-          html.classList.add("dark");
+      description: "Change color theme",
+      execute: (args) => {
+        if (args.length === 0) {
+          return [
+            { type: "output", content: "Available themes:" },
+            { type: "output", content: "" },
+            { type: "output", content: "  • default   - Classic retro theme" },
+            { type: "output", content: "  • atari     - Atari-inspired colors" },
+            { type: "output", content: "  • nintendo  - Nintendo-inspired colors" },
+            { type: "output", content: "  • vhs       - VHS aesthetic" },
+            { type: "output", content: "  • gameboy   - Gameboy green theme" },
+            { type: "output", content: "  • softpop   - Soft pastel colors" },
+            { type: "output", content: "" },
+            { type: "output", content: `Current theme: ${currentTheme}` },
+            { type: "output", content: "" },
+            { type: "success", content: "Usage: theme [name]" },
+          ];
         }
-        return [
-          {
-            type: "success",
-            content: `Theme switched to ${isDark ? "light" : "dark"} mode`,
-          },
-        ];
+
+        const themeName = args[0].toLowerCase();
+        if (themes[themeName as keyof typeof themes]) {
+          setCurrentTheme(themeName);
+          return [
+            {
+              type: "success",
+              content: `Theme changed to ${themes[themeName as keyof typeof themes].name}`,
+            },
+          ];
+        } else {
+          return [
+            {
+              type: "error",
+              content: `Unknown theme: ${themeName}`,
+            },
+            {
+              type: "output",
+              content: "Use 'theme' without arguments to see available themes",
+            },
+          ];
+        }
       },
     },
     echo: {
@@ -316,7 +446,7 @@ export function RetroTerminal() {
         <div className="flex items-center gap-3">
           <Terminal className="size-5 text-primary" />
           <span className="retro text-xs uppercase tracking-[0.2em] text-foreground">
-            FYKE Terminal
+            TERMINAL ORPHEUS
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -341,7 +471,15 @@ export function RetroTerminal() {
             onClick={() => setLines([
               {
                 type: "success",
-                content: "Welcome to FYKE TERMINAL v1.0.0",
+                content: "╔════════════════════════════════════════════════╗",
+              },
+              {
+                type: "success",
+                content: "║       TERMINAL ORPHEUS v1.0.0                  ║",
+              },
+              {
+                type: "success",
+                content: "╚════════════════════════════════════════════════╝",
               },
               {
                 type: "output",
@@ -396,31 +534,32 @@ export function RetroTerminal() {
               {/* Input Line */}
               <div className="mt-2 flex items-center gap-2">
                 <span className="retro text-xs text-primary">$</span>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="retro flex-1 bg-transparent text-xs text-foreground outline-none"
-                  placeholder="Type a command..."
-                  autoFocus
-                />
+                <div className="relative flex-1 flex items-center">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="retro w-full bg-transparent text-xs text-foreground outline-none"
+                    placeholder="Type a command..."
+                    autoFocus
+                  />
+                  {/* Cursor blink - positioned after input */}
+                  <motion.span
+                    className="ml-0.5 inline-block h-3 w-1.5 bg-primary"
+                    animate={{ opacity: [1, 0] }}
+                    transition={{ duration: 0.8, repeat: Infinity }}
+                  />
+                </div>
               </div>
-
-              {/* Cursor blink */}
-              <motion.span
-                className="inline-block h-3 w-1.5 bg-primary"
-                animate={{ opacity: [1, 0] }}
-                transition={{ duration: 0.8, repeat: Infinity }}
-              />
             </div>
 
             {/* Status Bar */}
             <div className="relative border-t-4 border-border bg-primary/10 px-4 py-2 dark:border-ring">
               <div className="flex items-center justify-between text-[0.5rem] uppercase tracking-[0.2em] text-muted-foreground">
                 <span className="retro">Ready</span>
-                <span className="retro">Commands: {Object.keys(commands).length}</span>
+                <span className="retro">Theme: {themes[currentTheme as keyof typeof themes].name}</span>
                 <span className="retro">Lines: {lines.length}</span>
               </div>
             </div>
