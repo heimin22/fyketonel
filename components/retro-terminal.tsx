@@ -82,15 +82,42 @@ export function RetroTerminal() {
 
   // Apply theme to document body to avoid conflicts with next-themes
   useEffect(() => {
-    const body = document.body;
-    // Remove all theme classes
-    Object.values(themes).forEach(theme => {
-      body.classList.remove(theme.class);
-    });
-    // Add current theme class if not default
-    if (currentTheme !== "default") {
-      body.classList.add(themes[currentTheme as keyof typeof themes].class);
-    }
+    // Ensure we're in the browser
+    if (typeof window === "undefined") return;
+    
+    const applyTheme = () => {
+      const body = document.body;
+      if (!body) return;
+      
+      const themeClass = themes[currentTheme as keyof typeof themes]?.class;
+      
+      // Remove all theme classes first
+      Object.values(themes).forEach(theme => {
+        body.classList.remove(theme.class);
+      });
+      
+      // Add current theme class if not default
+      if (currentTheme !== "default" && themeClass) {
+        body.classList.add(themeClass);
+        // Force a reflow to ensure styles are applied
+        void body.offsetHeight;
+      }
+    };
+    
+    // Apply theme immediately
+    applyTheme();
+    
+    // Also apply after a short delay to ensure it persists after next-themes initialization
+    const timeoutId = setTimeout(applyTheme, 10);
+    
+    // Also apply on next animation frame as a fallback
+    const rafId = requestAnimationFrame(applyTheme);
+    
+    // Cleanup function
+    return () => {
+      clearTimeout(timeoutId);
+      cancelAnimationFrame(rafId);
+    };
   }, [currentTheme]);
 
   // Commands definition
