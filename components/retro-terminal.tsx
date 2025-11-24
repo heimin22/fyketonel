@@ -56,6 +56,8 @@ const themes = {
       "--chart-5": "oklch(0.5 0.2 60)",
       "--visitor-counter": "oklch(0.6 0.25 140)",
       "--shadow-color": "oklch(0.5 0.2 60 / 0.3)",
+      "--hover-bg": "oklch(0.5 0.2 60 / 0.2)",
+      "--hover-text": "oklch(0.5 0.2 60)",
     },
     dark: {
       "--primary": "oklch(0.4 0.2 60)",
@@ -84,6 +86,8 @@ const themes = {
       "--chart-5": "oklch(0.4 0.2 60)",
       "--visitor-counter": "oklch(0.6 0.25 140)",
       "--shadow-color": "oklch(0.4 0.2 60 / 0.4)",
+      "--hover-bg": "oklch(0.4 0.2 60 / 0.2)",
+      "--hover-text": "oklch(0.4 0.2 60)",
     }
   },
   nintendo: {
@@ -116,6 +120,8 @@ const themes = {
       "--chart-5": "oklch(0.7 0.1 260)",
       "--visitor-counter": "oklch(0.6 0.25 280)",
       "--shadow-color": "oklch(0.5 0.2 280 / 0.3)",
+      "--hover-bg": "oklch(0.5 0.2 280 / 0.2)",
+      "--hover-text": "oklch(0.5 0.2 280)",
     },
     dark: {
       "--primary": "oklch(0.5 0.2 280)",
@@ -144,6 +150,8 @@ const themes = {
       "--chart-5": "oklch(0.7 0.1 260)",
       "--visitor-counter": "oklch(0.6 0.25 280)",
       "--shadow-color": "oklch(0.5 0.2 280 / 0.4)",
+      "--hover-bg": "oklch(0.5 0.2 280 / 0.2)",
+      "--hover-text": "oklch(0.5 0.2 280)",
     }
   },
   vhs: {
@@ -176,6 +184,8 @@ const themes = {
       "--chart-5": "oklch(0.903 0.0732 319.6198)",
       "--visitor-counter": "oklch(0.6 0.25 320)",
       "--shadow-color": "oklch(0.5915 0.2569 322.8961 / 0.3)",
+      "--hover-bg": "oklch(0.5915 0.2569 322.8961 / 0.2)",
+      "--hover-text": "oklch(0.5915 0.2569 322.8961)",
     },
     dark: {
       "--primary": "oklch(0.6668 0.2591 322.1499)",
@@ -204,6 +214,8 @@ const themes = {
       "--chart-5": "oklch(0.7 0.1 320)",
       "--visitor-counter": "oklch(0.6 0.25 320)",
       "--shadow-color": "oklch(0.6668 0.2591 322.1499 / 0.4)",
+      "--hover-bg": "oklch(0.6668 0.2591 322.1499 / 0.2)",
+      "--hover-text": "oklch(0.6668 0.2591 322.1499)",
     }
   },
   gameboy: {
@@ -236,6 +248,8 @@ const themes = {
       "--chart-5": "oklch(0.3 0.2 140)",
       "--visitor-counter": "oklch(0.6 0.25 140)",
       "--shadow-color": "oklch(0.7 0.2 120 / 0.3)",
+      "--hover-bg": "oklch(0.7 0.2 120 / 0.2)",
+      "--hover-text": "oklch(0.7 0.2 120)",
     },
     dark: {
       "--primary": "oklch(0.7 0.2 120)",
@@ -264,6 +278,8 @@ const themes = {
       "--chart-5": "oklch(0.3 0.2 140)",
       "--visitor-counter": "oklch(0.6 0.25 140)",
       "--shadow-color": "oklch(0.7 0.2 120 / 0.4)",
+      "--hover-bg": "oklch(0.7 0.2 120 / 0.2)",
+      "--hover-text": "oklch(0.7 0.2 120)",
     }
   },
   softpop: {
@@ -296,6 +312,8 @@ const themes = {
       "--chart-5": "oklch(0.7686 0.1647 70.0804)",
       "--visitor-counter": "oklch(0.6 0.25 270)",
       "--shadow-color": "oklch(0.5106 0.2301 276.9656 / 0.3)",
+      "--hover-bg": "oklch(0.5106 0.2301 276.9656 / 0.2)",
+      "--hover-text": "oklch(0.5106 0.2301 276.9656)",
     },
     dark: {
       "--primary": "oklch(0.6801 0.1583 276.9349)",
@@ -324,6 +342,8 @@ const themes = {
       "--chart-5": "oklch(0.75 0.15 70)",
       "--visitor-counter": "oklch(0.6 0.25 270)",
       "--shadow-color": "oklch(0.6801 0.1583 276.9349 / 0.4)",
+      "--hover-bg": "oklch(0.6801 0.1583 276.9349 / 0.2)",
+      "--hover-text": "oklch(0.6801 0.1583 276.9349)",
     }
   }
 };
@@ -415,7 +435,7 @@ export function RetroTerminal() {
       "--accent", "--accent-foreground", "--destructive", "--destructive-foreground",
       "--border", "--input", "--ring",
       "--chart-1", "--chart-2", "--chart-3", "--chart-4", "--chart-5",
-      "--visitor-counter", "--shadow-color"
+      "--visitor-counter", "--shadow-color", "--hover-bg", "--hover-text"
     ];
     
     // Apply CSS variables directly
