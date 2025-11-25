@@ -786,6 +786,8 @@ export function RetroTerminal() {
             { type: "output", content: "  • gameboy   - Gameboy green theme" },
             { type: "output", content: "  • softpop   - Soft pastel colors" },
             { type: "output", content: "  • ally      - Pink and yellow theme" },
+            { type: "output", content: "  • simon --dark - Simon dark theme" },
+            { type: "output", content: "  • simon --light - Simon light theme (Mario mode)" },
             { type: "output", content: "" },
             { type: "output", content: `Current theme: ${currentTheme}` },
             { type: "output", content: "" },
