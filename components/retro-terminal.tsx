@@ -809,6 +809,8 @@ export function RetroTerminal() {
           if (typeof window !== "undefined") {
             localStorage.setItem("terminal-theme", "simon");
             localStorage.setItem("terminal-simon-mode", mode);
+            // Dispatch custom event for background to listen
+            window.dispatchEvent(new CustomEvent("themeChanged", { detail: { theme: "simon", mode } }));
           }
           
           return [
@@ -824,6 +826,8 @@ export function RetroTerminal() {
           // Persist theme to localStorage
           if (typeof window !== "undefined") {
             localStorage.setItem("terminal-theme", themeName);
+            // Dispatch custom event for background to listen
+            window.dispatchEvent(new CustomEvent("themeChanged", { detail: { theme: themeName } }));
           }
           return [
             {
