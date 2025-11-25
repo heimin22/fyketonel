@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,38 @@ export function RetroBackground({
   className,
   children,
 }: RetroBackgroundProps) {
+  const [isMarioMode, setIsMarioMode] = useState(false);
+
+  // Detect Simon light theme from localStorage
+  useEffect(() => {
+    const checkTheme = () => {
+      if (typeof window !== "undefined") {
+        const theme = localStorage.getItem("terminal-theme");
+        const simonMode = localStorage.getItem("terminal-simon-mode");
+        const shouldBeMario = theme === "simon" && simonMode === "light";
+        console.log("[RetroBackground] Theme check:", { theme, simonMode, shouldBeMario });
+        setIsMarioMode(shouldBeMario);
+      }
+    };
+
+    checkTheme();
+
+    // Listen for custom theme change event
+    window.addEventListener("themeChanged", checkTheme);
+    
+    // Listen for storage changes (for cross-tab)
+    window.addEventListener("storage", checkTheme);
+    
+    // Also check periodically in case localStorage is updated in same tab
+    const interval = setInterval(checkTheme, 200);
+
+    return () => {
+      window.removeEventListener("themeChanged", checkTheme);
+      window.removeEventListener("storage", checkTheme);
+      clearInterval(interval);
+    };
+  }, []);
+
   const randomFromSeed = (seed: number) => {
     const x = Math.sin(seed) * 10000;
     return x - Math.floor(x);
@@ -59,6 +91,20 @@ export function RetroBackground({
     });
   }, []);
 
+  const clouds = useMemo(() => {
+    return Array.from({ length: 8 }, (_, index) => {
+      const baseSeed = index + 200;
+      return {
+        id: `cloud-${index}`,
+        top: percent(0.05 + randomFromSeed(baseSeed) * 0.35),
+        left: percent(randomFromSeed(baseSeed * 2)),
+        duration: seconds(20 + randomFromSeed(baseSeed * 3) * 20), // Faster: 20-40s
+        delay: seconds(randomFromSeed(baseSeed * 4) * 10),
+        scale: 1.2 + randomFromSeed(baseSeed * 5) * 0.8, // Bigger: 1.2-2.0x
+      };
+    });
+  }, []);
+
   return (
     <div
       className={cn(
@@ -66,41 +112,142 @@ export function RetroBackground({
         className
       )}
     >
-      <div
-        aria-hidden="true"
-        className="retro-background retro-background--stars absolute inset-0"
-      >
-        {stars.map((star) => (
-          <span
-            key={star.id}
-            className="retro-background__star"
-            style={{
-              top: star.top,
-              left: star.left,
-              width: star.size,
-              height: star.size,
-              filter: `blur(${star.blur})`,
-              opacity: star.opacity,
-              animationDelay: star.twinkleDelay,
-              animationDuration: star.driftDuration,
-            }}
-          />
-        ))}
+      {isMarioMode ? (
+        // Mario-style background
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(to bottom, #87CEEB 0%, #B0E0E6 70%, #2D5016 70%, #1A3D0A 100%)",
+          }}
+        >
+          {/* Clouds */}
+          {clouds.map((cloud) => (
+            <div
+              key={cloud.id}
+              className="absolute"
+              style={{
+                top: cloud.top,
+                left: cloud.left,
+                animationDelay: cloud.delay,
+                animationDuration: cloud.duration,
+                transform: `scale(${cloud.scale})`,
+                animation: "drift-cloud linear infinite",
+              }}
+            >
+              {/* Pixel-art cloud */}
+              <div className="relative" style={{ width: "80px", height: "40px" }}>
+                <div className="absolute bg-white" style={{ top: "8px", left: "16px", width: "16px", height: "8px" }} />
+                <div className="absolute bg-white" style={{ top: "8px", left: "32px", width: "32px", height: "8px" }} />
+                <div className="absolute bg-white" style={{ top: "16px", left: "8px", width: "64px", height: "8px" }} />
+                <div className="absolute bg-white" style={{ top: "24px", left: "16px", width: "48px", height: "8px" }} />
+                <div className="absolute bg-white opacity-80" style={{ top: "0px", left: "24px", width: "24px", height: "8px" }} />
+                <div className="absolute bg-white opacity-80" style={{ top: "32px", left: "24px", width: "32px", height: "8px" }} />
+              </div>
+            </div>
+          ))}
 
-        {shootingStars.map((star) => (
-          <span
-            key={star.id}
-            className="retro-background__shooting-star"
-            style={{
-              top: star.top,
-              left: star.left,
-              animationDelay: star.delay,
-              animationDuration: star.duration,
-              transform: `scale(${star.scale})`,
-            }}
-          />
-        ))}
-      </div>
+          {/* Grass section with pixel details */}
+          <div className="absolute bottom-0 left-0 right-0" style={{ height: "30%" }}>
+            {/* Darker grass base with multiple layers for texture */}
+            <div className="absolute inset-0">
+              {/* Layer 1: Dark grass blades */}
+              {Array.from({ length: 80 }, (_, i) => (
+                <div
+                  key={`grass-dark-${i}`}
+                  className="absolute"
+                  style={{
+                    bottom: `${randomFromSeed(i * 7) * 25}%`,
+                    left: `${(i * 1.25) % 100}%`,
+                    width: "6px",
+                    height: `${12 + randomFromSeed(i * 11) * 20}px`,
+                    backgroundColor: "#307e0cff",
+                    opacity: 0.6 + randomFromSeed(i * 13) * 0.3,
+                  }}
+                />
+              ))}
+              {/* Layer 2: Medium grass blades */}
+              {Array.from({ length: 60 }, (_, i) => (
+                <div
+                  key={`grass-med-${i}`}
+                  className="absolute"
+                  style={{
+                    bottom: `${randomFromSeed(i * 17) * 20}%`,
+                    left: `${(i * 1.67) % 100}%`,
+                    width: "4px",
+                    height: `${10 + randomFromSeed(i * 19) * 18}px`,
+                    backgroundColor: "#2D5016",
+                    opacity: 0.5 + randomFromSeed(i * 23) * 0.4,
+                  }}
+                />
+              ))}
+              {/* Layer 3: Light grass highlights */}
+              {Array.from({ length: 40 }, (_, i) => (
+                <div
+                  key={`grass-light-${i}`}
+                  className="absolute"
+                  style={{
+                    bottom: `${randomFromSeed(i * 29) * 15}%`,
+                    left: `${(i * 2.5) % 100}%`,
+                    width: "3px",
+                    height: `${8 + randomFromSeed(i * 31) * 14}px`,
+                    backgroundColor: "#4A7C2C",
+                    opacity: 0.4 + randomFromSeed(i * 37) * 0.3,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <style jsx>{`
+            @keyframes drift-cloud {
+              from {
+                transform: translateX(0) scale(var(--scale, 1));
+              }
+              to {
+                transform: translateX(calc(100vw + 100px)) scale(var(--scale, 1));
+              }
+            }
+          `}</style>
+        </div>
+      ) : (
+        // Default stars background
+        <div
+          aria-hidden="true"
+          className="retro-background retro-background--stars absolute inset-0"
+        >
+          {stars.map((star) => (
+            <span
+              key={star.id}
+              className="retro-background__star"
+              style={{
+                top: star.top,
+                left: star.left,
+                width: star.size,
+                height: star.size,
+                filter: `blur(${star.blur})`,
+                opacity: star.opacity,
+                animationDelay: star.twinkleDelay,
+                animationDuration: star.driftDuration,
+              }}
+            />
+          ))}
+
+          {shootingStars.map((star) => (
+            <span
+              key={star.id}
+              className="retro-background__shooting-star"
+              style={{
+                top: star.top,
+                left: star.left,
+                animationDelay: star.delay,
+                animationDuration: star.duration,
+                transform: `scale(${star.scale})`,
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       <div className="relative z-10">{children}</div>
     </div>

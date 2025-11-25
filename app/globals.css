@@ -450,3 +450,34 @@ body.dark.theme-softpop {
   --primary: oklch(0.6801 0.1583 276.9349) !important;
   --border: oklch(0.4459 0 0) !important;
 }
+
+/* Simon Theme - Gold titles with pixel shadow in light mode */
+.theme-simon h1,
+.theme-simon h2,
+.theme-simon h3 {
+  color: #FFD700 !important;
+  text-shadow: 
+    2px 0 0 #CC6600,
+    0 2px 0 #CC6600,
+    2px 2px 0 #CC6600,
+    4px 2px 0 #CC6600,
+    2px 4px 0 #CC6600,
+    4px 4px 0 #CC6600;
+}
+
+/* Ensure gold titles only in light mode */
+html:not(.dark) .theme-simon h1,
+html:not(.dark) .theme-simon h2,
+html:not(.dark) .theme-simon h3,
+body:not(.dark) .theme-simon h1,
+body:not(.dark) .theme-simon h2,
+body:not(.dark) .theme-simon h3 {
+  color: #FFD700 !important;
+  text-shadow: 
+    2px 0 0 #CC6600,
+    0 2px 0 #CC6600,
+    2px 2px 0 #CC6600,
+    4px 2px 0 #CC6600,
+    2px 4px 0 #CC6600,
+    4px 4px 0 #CC6600;
+}

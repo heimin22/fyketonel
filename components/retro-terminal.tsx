@@ -409,6 +409,70 @@ const themes = {
       "--hover-bg": "oklch(0.75 0.25 350 / 0.2)",
       "--hover-text": "oklch(0.75 0.25 350)",
     }
+  },
+  simon: {
+    name: "Simon",
+    class: "theme-simon",
+    light: {
+      "--primary": "oklch(0.75 0.18 60)",
+      "--primary-foreground": "oklch(0.05 0 0)",
+      "--background": "oklch(0.98 0.05 60)",
+      "--foreground": "oklch(0.05 0 0)",
+      "--card": "oklch(0.99 0.03 60)",
+      "--card-foreground": "oklch(0.05 0 0)",
+      "--popover": "oklch(0.99 0.03 60)",
+      "--popover-foreground": "oklch(0.05 0 0)",
+      "--secondary": "oklch(0.95 0.08 60)",
+      "--secondary-foreground": "oklch(0.05 0 0)",
+      "--muted": "oklch(0.92 0.05 60)",
+      "--muted-foreground": "oklch(0.4 0 0)",
+      "--accent": "oklch(0.8 0.2 60)",
+      "--accent-foreground": "oklch(0.05 0 0)",
+      "--destructive": "oklch(0.55 0.25 25)",
+      "--destructive-foreground": "oklch(0.99 0.03 60)",
+      "--border": "oklch(0.75 0.18 60)",
+      "--input": "oklch(0.75 0.18 60)",
+      "--ring": "oklch(0.75 0.18 60)",
+      "--chart-1": "oklch(0.75 0.18 60)",
+      "--chart-2": "oklch(0.85 0.15 55)",
+      "--chart-3": "oklch(0.7 0.2 65)",
+      "--chart-4": "oklch(0.95 0.08 60)",
+      "--chart-5": "oklch(0.8 0.2 60)",
+      "--visitor-counter": "oklch(0.75 0.18 60)",
+      "--shadow-color": "oklch(0.75 0.18 60 / 0.3)",
+      "--hover-bg": "oklch(0.75 0.18 60 / 0.15)",
+      "--hover-text": "oklch(0.75 0.18 60)",
+    },
+    dark: {
+      "--primary": "oklch(0.85 0.2 60)",
+      "--primary-foreground": "oklch(0.05 0 0)",
+      "--background": "oklch(0.08 0 0)",
+      "--foreground": "oklch(0.96 0.08 60)",
+      "--card": "oklch(0.12 0 0)",
+      "--card-foreground": "oklch(0.96 0.08 60)",
+      "--popover": "oklch(0.1 0 0)",
+      "--popover-foreground": "oklch(0.96 0.08 60)",
+      "--secondary": "oklch(0.25 0.05 60)",
+      "--secondary-foreground": "oklch(0.96 0.08 60)",
+      "--muted": "oklch(0.15 0 0)",
+      "--muted-foreground": "oklch(0.75 0.05 60)",
+      "--accent": "oklch(0.9 0.22 60)",
+      "--accent-foreground": "oklch(0.05 0 0)",
+      "--destructive": "oklch(0.6 0.28 20)",
+      "--destructive-foreground": "oklch(0.96 0.08 60)",
+      "--border": "oklch(0.85 0.2 60)",
+      "--input": "oklch(0.85 0.2 60)",
+      "--ring": "oklch(0.85 0.2 60)",
+      "--chart-1": "oklch(0.85 0.2 60)",
+      "--chart-2": "oklch(0.9 0.18 55)",
+      "--chart-3": "oklch(0.8 0.22 65)",
+      "--chart-4": "oklch(0.95 0.08 60)",
+      "--chart-5": "oklch(0.9 0.22 60)",
+      "--visitor-counter": "oklch(0.85 0.2 60)",
+      "--shadow-color": "oklch(0.85 0.2 60 / 0.5)",
+      "--hover-bg": "oklch(0.85 0.2 60 / 0.2)",
+      "--hover-text": "oklch(0.85 0.2 60)",
+    }
   }
 };
 
@@ -448,6 +512,7 @@ export function RetroTerminal() {
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const [currentTheme, setCurrentTheme] = useState<string>("default");
+  const [simonThemeMode, setSimonThemeMode] = useState<"dark" | "light">("dark");
   const [isMounted, setIsMounted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
@@ -460,8 +525,12 @@ export function RetroTerminal() {
       setIsMounted(true);
       if (typeof window !== "undefined") {
         const savedTheme = localStorage.getItem("terminal-theme");
+        const savedSimonMode = localStorage.getItem("terminal-simon-mode") as "dark" | "light" | null;
         if (savedTheme && themes[savedTheme as keyof typeof themes]) {
           setCurrentTheme(savedTheme);
+        }
+        if (savedSimonMode && (savedSimonMode === "dark" || savedSimonMode === "light")) {
+          setSimonThemeMode(savedSimonMode);
         }
       }
     });
@@ -484,7 +553,9 @@ export function RetroTerminal() {
     if (!root) return;
     
     const theme = themes[currentTheme as keyof typeof themes];
-    const isDark = resolvedTheme === "dark";
+    // For Simon theme, use the simonThemeMode preference instead of system theme
+    const effectiveResolvedTheme = resolvedTheme ?? "dark";
+    const isDark = currentTheme === "simon" ? simonThemeMode === "dark" : effectiveResolvedTheme === "dark";
     
     // Get theme values based on dark/light mode
     const themeValues = currentTheme !== "default" && theme 
@@ -532,7 +603,7 @@ export function RetroTerminal() {
       body?.classList.add(theme.class);
       html?.classList.add(theme.class);
     }
-  }, [currentTheme, resolvedTheme]);
+  }, [currentTheme, simonThemeMode, resolvedTheme]);
 
   // Commands definition (with access to state via closures)
   const commands: Record<string, Command> = {
@@ -723,11 +794,40 @@ export function RetroTerminal() {
         }
 
         const themeName = args[0].toLowerCase();
+        
+        // Special handling for Simon theme with --dark and --light flags
+        if (themeName === "simon") {
+          const hasLightFlag = args.includes("--light");
+          
+          // Determine mode: --light takes precedence, default to dark
+          const mode = hasLightFlag ? "light" : "dark";
+          
+          setCurrentTheme("simon");
+          setSimonThemeMode(mode);
+          
+          // Persist to localStorage
+          if (typeof window !== "undefined") {
+            localStorage.setItem("terminal-theme", "simon");
+            localStorage.setItem("terminal-simon-mode", mode);
+            // Dispatch custom event to notify background component
+            window.dispatchEvent(new Event("themeChanged"));
+          }
+          
+          return [
+            {
+              type: "success",
+              content: `Theme changed to Simon (${mode} mode)`,
+            },
+          ];
+        }
+        
         if (themes[themeName as keyof typeof themes]) {
           setCurrentTheme(themeName);
           // Persist theme to localStorage
           if (typeof window !== "undefined") {
             localStorage.setItem("terminal-theme", themeName);
+            // Dispatch custom event to notify background component
+            window.dispatchEvent(new Event("themeChanged"));
           }
           return [
             {
