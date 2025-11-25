@@ -60,6 +60,7 @@ async function getJokeOfTheDay() {
 
 export default function Home() {
   const [joke, setJoke] = useState("Loading joke...");
+  const [isAllyMode, setIsAllyMode] = useState(false);
   const today = new Date();
 
   // Detect screen sizes
@@ -84,6 +85,23 @@ export default function Home() {
 
     return () => {
       isMounted = false;
+    };
+  }, []);
+
+  // Detect Ally theme
+  useEffect(() => {
+    const checkTheme = () => {
+      if (typeof window !== "undefined") {
+        const theme = localStorage.getItem("terminal-theme");
+        setIsAllyMode(theme === "ally");
+      }
+    };
+    checkTheme();
+    window.addEventListener("themeChanged", checkTheme);
+    const interval = setInterval(checkTheme, 100);
+    return () => {
+      window.removeEventListener("themeChanged", checkTheme);
+      clearInterval(interval);
     };
   }, []);
 
@@ -240,11 +258,22 @@ export default function Home() {
               </div>
             </div>
 
-            <div className={`${panelClass} flex flex-col h-full`}>
-              <p className="retro text-[0.5rem] uppercase tracking-[0.2em] text-muted-foreground sm:text-[0.6rem] sm:tracking-[0.25em] md:text-xs md:tracking-[0.3em]">
+            <div className={`${panelClass} flex flex-col h-full relative`}>
+              {/* Lotus background for Ally theme */}
+              {isAllyMode && (
+                <div className="pointer-events-none absolute inset-0 opacity-40">
+                  <Image
+                    src="/assets/tulips.png"
+                    alt=""
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              <p className="retro relative z-10 text-[0.5rem] uppercase tracking-[0.2em] text-muted-foreground sm:text-[0.6rem] sm:tracking-[0.25em] md:text-xs md:tracking-[0.3em]">
                 A random joke for your mood.
               </p>
-              <div className="mt-4 flex flex-1 items-center justify-center sm:mt-5 md:mt-6">
+              <div className="mt-4 flex flex-1 items-center justify-center sm:mt-5 md:mt-6 relative z-10">
                 <p className="retro text-xs leading-relaxed text-center text-muted-foreground sm:text-sm md:text-base lg:text-lg">
                   {joke}
                 </p>

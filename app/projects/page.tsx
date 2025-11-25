@@ -1554,6 +1554,7 @@ const TechStackConstellation = ({
 }) => {
   const [hoveredTech, setHoveredTech] = useState<string | null>(null);
   const [selectedTech, setSelectedTech] = useState<string | null>(null);
+  const [isAllyMode, setIsAllyMode] = useState(false);
 
   // Generate stable random positions for stars (only on client to avoid hydration mismatch)
   const [starPositions, setStarPositions] = useState<Array<{
@@ -1580,6 +1581,23 @@ const TechStackConstellation = ({
         );
       });
     }
+  }, []);
+
+  // Detect Ally theme
+  useEffect(() => {
+    const checkTheme = () => {
+      if (typeof window !== "undefined") {
+        const theme = localStorage.getItem("terminal-theme");
+        setIsAllyMode(theme === "ally");
+      }
+    };
+    checkTheme();
+    window.addEventListener("themeChanged", checkTheme);
+    const interval = setInterval(checkTheme, 100);
+    return () => {
+      window.removeEventListener("themeChanged", checkTheme);
+      clearInterval(interval);
+    };
   }, []);
 
   // Build tech stack data
@@ -1662,6 +1680,62 @@ const TechStackConstellation = ({
   };
 
   const formatPercent = (value: number) => value.toFixed(3);
+
+  // Butterfly formation function for Ally theme
+  const getButterflyPosition = (index: number, total: number) => {
+    const centerX = 50;
+    const centerY = 50;
+    
+    // Divide nodes into body and wings
+    const bodyCount = Math.max(1, Math.floor(total * 0.1)); // 10% for body
+    const wingCount = Math.floor((total - bodyCount) / 4); // Divide remaining into 4 wing sections
+    
+    if (index < bodyCount) {
+      // Body nodes (vertical line in center)
+      const bodyY = 30 + (index / bodyCount) * 40; // Spread vertically from 30% to 70%
+      return { x: centerX, y: bodyY };
+    } else {
+      const wingIndex = index - bodyCount;
+      const wingSection = Math.floor(wingIndex / wingCount);
+      const positionInWing = (wingIndex % wingCount) / wingCount;
+      
+      // Butterfly wing shape parameters
+      const wingBaseX = centerX;
+      const wingBaseY = centerY;
+      const wingSpan = 45; // How far wings extend (increased from 35)
+      const wingHeight = 30; // Vertical spread of wings
+      
+      let x, y;
+      
+      if (wingSection === 0) {
+        // Top left wing
+        const angle = Math.PI * 0.75 + positionInWing * Math.PI * 0.5; // 135° to 225°
+        const distance = wingSpan * (0.2 + positionInWing * 0.8); // Start closer, extend further
+        x = wingBaseX + distance * Math.cos(angle);
+        y = wingBaseY - wingHeight * (0.5 + positionInWing * 0.5);
+      } else if (wingSection === 1) {
+        // Top right wing
+        const angle = Math.PI * 0.25 - positionInWing * Math.PI * 0.5; // 45° to -45°
+        const distance = wingSpan * (0.2 + positionInWing * 0.8); // Start closer, extend further
+        x = wingBaseX + distance * Math.cos(angle);
+        y = wingBaseY - wingHeight * (0.5 + positionInWing * 0.5);
+      } else if (wingSection === 2) {
+        // Bottom left wing
+        const angle = Math.PI * 0.75 + positionInWing * Math.PI * 0.5; // 135° to 225°
+        const distance = wingSpan * (0.2 + positionInWing * 0.8); // Start closer, extend further
+        x = wingBaseX + distance * Math.cos(angle);
+        y = wingBaseY + wingHeight * (0.5 + positionInWing * 0.5);
+      } else {
+        // Bottom right wing
+        const angle = Math.PI * 0.25 - positionInWing * Math.PI * 0.5; // 45° to -45°
+        const distance = wingSpan * (0.2 + positionInWing * 0.8); // Start closer, extend further
+        x = wingBaseX + distance * Math.cos(angle);
+        y = wingBaseY + wingHeight * (0.5 + positionInWing * 0.5);
+      }
+      
+      return { x, y };
+    }
+  };
 
   return (
     <div className={cn(panelClass, "overflow-hidden")}>
@@ -1778,26 +1852,42 @@ const TechStackConstellation = ({
                 activeTech &&
                 (connectedTechs.has(conn.from) && connectedTechs.has(conn.to));
 
-              // Simple positioning in a circular/scattered layout
-              const angle1 = (fromIndex / techData.length) * 2 * Math.PI;
-              const angle2 = (toIndex / techData.length) * 2 * Math.PI;
+              // Position based on theme
+              let x1: number, y1: number, x2: number, y2: number;
               
-              const radius = 40; // percentage
-              const centerX = 50;
-              const centerY = 50;
+              if (isAllyMode) {
+                // Butterfly formation
+                const pos1 = getButterflyPosition(fromIndex, techData.length);
+                const pos2 = getButterflyPosition(toIndex, techData.length);
+                x1 = pos1.x;
+                y1 = pos1.y;
+                x2 = pos2.x;
+                y2 = pos2.y;
+              } else {
+                // Circular layout
+                const angle1 = (fromIndex / techData.length) * 2 * Math.PI;
+                const angle2 = (toIndex / techData.length) * 2 * Math.PI;
+                const radius = 40;
+                const centerX = 50;
+                const centerY = 50;
+                x1 = centerX + radius * Math.cos(angle1);
+                y1 = centerY + radius * Math.sin(angle1);
+                x2 = centerX + radius * Math.cos(angle2);
+                y2 = centerY + radius * Math.sin(angle2);
+              }
               
-              const x1 = formatPercent(centerX + radius * Math.cos(angle1));
-              const y1 = formatPercent(centerY + radius * Math.sin(angle1));
-              const x2 = formatPercent(centerX + radius * Math.cos(angle2));
-              const y2 = formatPercent(centerY + radius * Math.sin(angle2));
+              const x1Formatted = formatPercent(x1);
+              const y1Formatted = formatPercent(y1);
+              const x2Formatted = formatPercent(x2);
+              const y2Formatted = formatPercent(y2);
 
               return (
                 <motion.line
                   key={`${conn.from}-${conn.to}-${i}`}
-                  x1={`${x1}%`}
-                  y1={`${y1}%`}
-                  x2={`${x2}%`}
-                  y2={`${y2}%`}
+                  x1={`${x1Formatted}%`}
+                  y1={`${y1Formatted}%`}
+                  x2={`${x2Formatted}%`}
+                  y2={`${y2Formatted}%`}
                   stroke="currentColor"
                   strokeWidth={isActive ? 2 : 1}
                   className={cn(
@@ -1819,12 +1909,26 @@ const TechStackConstellation = ({
           {/* Tech Stack Nodes */}
           <div className="pointer-events-none absolute inset-0">
             {techData.map((tech, index) => {
-              const angle = (index / techData.length) * 2 * Math.PI;
-              const radius = 40;
-              const centerX = 50;
-              const centerY = 50;
-              const x = formatPercent(centerX + radius * Math.cos(angle));
-              const y = formatPercent(centerY + radius * Math.sin(angle));
+              // Position based on theme
+              let x: number, y: number;
+              
+              if (isAllyMode) {
+                // Butterfly formation
+                const pos = getButterflyPosition(index, techData.length);
+                x = pos.x;
+                y = pos.y;
+              } else {
+                // Circular layout
+                const angle = (index / techData.length) * 2 * Math.PI;
+                const radius = 40;
+                const centerX = 50;
+                const centerY = 50;
+                x = centerX + radius * Math.cos(angle);
+                y = centerY + radius * Math.sin(angle);
+              }
+              
+              const xFormatted = formatPercent(x);
+              const yFormatted = formatPercent(y);
               const isActive = activeTech === tech.name;
               const isConnected = connectedTechs.has(tech.name);
 
@@ -1840,8 +1944,8 @@ const TechStackConstellation = ({
                       : "border-muted-foreground/50 bg-muted-foreground/20"
                   )}
                   style={{
-                    left: `calc(${x}% - 6px)`,
-                    top: `calc(${y}% - 6px)`,
+                    left: `calc(${xFormatted}% - 6px)`,
+                    top: `calc(${yFormatted}% - 6px)`,
                   }}
                 />
               );
