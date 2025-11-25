@@ -502,6 +502,23 @@ body:not(.dark) .theme-simon h3 {
   color: var(--hover-text) !important;
 }
 
+/* Ally Theme - Navigation active/selected styles */
+.theme-ally [data-slot="navigation-menu-link"] a.border-primary.bg-primary\/20,
+.theme-ally a.border-primary.bg-primary\/20.text-primary {
+  border-color: oklch(0.65 0.25 350) !important;
+  background-color: oklch(0.65 0.25 350 / 0.2) !important;
+  color: oklch(0.65 0.25 350) !important;
+}
+
+/* Target any link with active state classes in Ally theme */
+.theme-ally header a.border-primary,
+.theme-ally header a.bg-primary\/20,
+.theme-ally header a.text-primary {
+  border-color: oklch(0.65 0.25 350) !important;
+  background-color: oklch(0.65 0.25 350 / 0.2) !important;
+  color: oklch(0.65 0.25 350) !important;
+}
+
 .theme-ally .ally-visitor-label {
   color: var(--primary) !important;
 }
