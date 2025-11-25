@@ -96,11 +96,11 @@ export function RetroBackground({
       const baseSeed = index + 200;
       return {
         id: `cloud-${index}`,
-        top: percent(0.1 + randomFromSeed(baseSeed) * 0.4),
+        top: percent(0.05 + randomFromSeed(baseSeed) * 0.35),
         left: percent(randomFromSeed(baseSeed * 2)),
-        duration: seconds(40 + randomFromSeed(baseSeed * 3) * 30),
+        duration: seconds(20 + randomFromSeed(baseSeed * 3) * 20), // Faster: 20-40s
         delay: seconds(randomFromSeed(baseSeed * 4) * 10),
-        scale: 0.6 + randomFromSeed(baseSeed * 5) * 0.6,
+        scale: 1.2 + randomFromSeed(baseSeed * 5) * 0.8, // Bigger: 1.2-2.0x
       };
     });
   }, []);
@@ -118,7 +118,7 @@ export function RetroBackground({
           aria-hidden="true"
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(to bottom, #87CEEB 0%, #B0E0E6 70%, #90EE90 70%, #7CCD7C 100%)",
+            background: "linear-gradient(to bottom, #87CEEB 0%, #B0E0E6 70%, #2D5016 70%, #1A3D0A 100%)",
           }}
         >
           {/* Clouds */}
@@ -149,17 +149,50 @@ export function RetroBackground({
 
           {/* Grass section with pixel details */}
           <div className="absolute bottom-0 left-0 right-0" style={{ height: "30%" }}>
-            {/* Grass blades pattern */}
-            <div className="absolute inset-0 opacity-30">
-              {Array.from({ length: 50 }, (_, i) => (
+            {/* Darker grass base with multiple layers for texture */}
+            <div className="absolute inset-0">
+              {/* Layer 1: Dark grass blades */}
+              {Array.from({ length: 80 }, (_, i) => (
                 <div
-                  key={`grass-${i}`}
-                  className="absolute bg-green-700"
+                  key={`grass-dark-${i}`}
+                  className="absolute"
                   style={{
-                    bottom: `${randomFromSeed(i * 7) * 20}%`,
-                    left: `${(i * 2) % 100}%`,
+                    bottom: `${randomFromSeed(i * 7) * 25}%`,
+                    left: `${(i * 1.25) % 100}%`,
+                    width: "6px",
+                    height: `${12 + randomFromSeed(i * 11) * 20}px`,
+                    backgroundColor: "#307e0cff",
+                    opacity: 0.6 + randomFromSeed(i * 13) * 0.3,
+                  }}
+                />
+              ))}
+              {/* Layer 2: Medium grass blades */}
+              {Array.from({ length: 60 }, (_, i) => (
+                <div
+                  key={`grass-med-${i}`}
+                  className="absolute"
+                  style={{
+                    bottom: `${randomFromSeed(i * 17) * 20}%`,
+                    left: `${(i * 1.67) % 100}%`,
                     width: "4px",
-                    height: `${8 + randomFromSeed(i * 11) * 16}px`,
+                    height: `${10 + randomFromSeed(i * 19) * 18}px`,
+                    backgroundColor: "#2D5016",
+                    opacity: 0.5 + randomFromSeed(i * 23) * 0.4,
+                  }}
+                />
+              ))}
+              {/* Layer 3: Light grass highlights */}
+              {Array.from({ length: 40 }, (_, i) => (
+                <div
+                  key={`grass-light-${i}`}
+                  className="absolute"
+                  style={{
+                    bottom: `${randomFromSeed(i * 29) * 15}%`,
+                    left: `${(i * 2.5) % 100}%`,
+                    width: "3px",
+                    height: `${8 + randomFromSeed(i * 31) * 14}px`,
+                    backgroundColor: "#4A7C2C",
+                    opacity: 0.4 + randomFromSeed(i * 37) * 0.3,
                   }}
                 />
               ))}
