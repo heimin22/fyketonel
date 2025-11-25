@@ -528,3 +528,27 @@ body:not(.dark) .theme-simon h3 {
   text-shadow: none !important;
   filter: none !important;
 }
+
+/* Ally Theme - Change yellow/amber gradients to pink */
+.theme-ally .bg-gradient-to-r.from-yellow-600,
+.theme-ally .bg-gradient-to-r.via-orange-600,
+.theme-ally .bg-gradient-to-r.to-red-700,
+.theme-ally .bg-gradient-to-b.from-yellow-500,
+.theme-ally .bg-gradient-to-b.to-orange-600 {
+  background-image: linear-gradient(to right, oklch(0.65 0.25 350), oklch(0.7 0.25 350), oklch(0.65 0.25 350)) !important;
+}
+
+.theme-ally .bg-gradient-to-b.from-amber-200.via-amber-300.to-amber-500,
+.theme-ally .bg-gradient-to-b.from-amber-200,
+.theme-ally .bg-gradient-to-b.via-amber-300,
+.theme-ally .bg-gradient-to-b.to-amber-500 {
+  background-image: linear-gradient(to bottom, oklch(0.85 0.2 350), oklch(0.75 0.25 350), oklch(0.65 0.25 350)) !important;
+}
+
+.theme-ally .border-amber-500 {
+  border-color: oklch(0.65 0.25 350) !important;
+}
+
+.theme-ally .text-amber-900 {
+  color: oklch(0.2 0.05 350) !important;
+}

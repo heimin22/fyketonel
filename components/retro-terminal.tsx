@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Terminal, Minimize2, Maximize2, X } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -1273,6 +1274,24 @@ export function RetroTerminal() {
     }
   };
 
+  const [isAllyMode, setIsAllyMode] = useState(false);
+  
+  useEffect(() => {
+    const checkTheme = () => {
+      if (typeof window !== "undefined") {
+        const theme = localStorage.getItem("terminal-theme");
+        setIsAllyMode(theme === "ally");
+      }
+    };
+    checkTheme();
+    window.addEventListener("themeChanged", checkTheme);
+    const interval = setInterval(checkTheme, 100);
+    return () => {
+      window.removeEventListener("themeChanged", checkTheme);
+      clearInterval(interval);
+    };
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -1285,6 +1304,17 @@ export function RetroTerminal() {
           : "border-4 border-border bg-card shadow-[6px_6px_0_var(--border)] dark:border-ring"
       )}
     >
+      {/* Cat background for Ally theme */}
+      {isAllyMode && (
+        <div className="pointer-events-none absolute inset-0 opacity-20">
+          <Image
+            src="/assets/cat.png"
+            alt=""
+            fill
+            className="object-cover"
+          />
+        </div>
+      )}
       {/* Scanline effect */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.03)_50%)] bg-[length:100%_4px] opacity-30" />
 

@@ -595,12 +595,41 @@ const QuestionMarkBlock = ({
 }: {
   title: string;
   caption?: string;
-}) => (
-  <div className="relative flex h-full min-h-[260px] w-full flex-col items-center justify-center overflow-hidden rounded-sm border-4 border-amber-500 bg-gradient-to-b from-amber-200 via-amber-300 to-amber-500 text-center text-amber-900 shadow-[0_0_0_4px_rgba(0,0,0,0.25),inset_0_-12px_0_rgba(0,0,0,0.15)]">
-    <span className="retro text-7xl drop-shadow-[0_6px_0_rgba(0,0,0,0.35)]">?</span>
-    <p className="retro mt-4 max-w-xs text-[0.6rem] uppercase tracking-[0.2em]">
-      {title}
-    </p>
+}) => {
+  const [isAllyMode, setIsAllyMode] = useState(false);
+  
+  useEffect(() => {
+    const checkTheme = () => {
+      if (typeof window !== "undefined") {
+        const theme = localStorage.getItem("terminal-theme");
+        setIsAllyMode(theme === "ally");
+      }
+    };
+    checkTheme();
+    window.addEventListener("themeChanged", checkTheme);
+    const interval = setInterval(checkTheme, 100);
+    return () => {
+      window.removeEventListener("themeChanged", checkTheme);
+      clearInterval(interval);
+    };
+  }, []);
+  
+  return (
+    <div className="relative flex h-full min-h-[260px] w-full flex-col items-center justify-center overflow-hidden rounded-sm border-4 border-amber-500 bg-gradient-to-b from-amber-200 via-amber-300 to-amber-500 text-center text-amber-900 shadow-[0_0_0_4px_rgba(0,0,0,0.25),inset_0_-12px_0_rgba(0,0,0,0.15)]">
+      {isAllyMode ? (
+        <Image
+          src="/assets/butterfly.png"
+          alt="Butterfly"
+          width={80}
+          height={80}
+          className="drop-shadow-[0_6px_0_rgba(0,0,0,0.35)]"
+        />
+      ) : (
+        <span className="retro text-7xl drop-shadow-[0_6px_0_rgba(0,0,0,0.35)]">?</span>
+      )}
+      <p className="retro mt-4 max-w-xs text-[0.6rem] uppercase tracking-[0.2em]">
+        {title}
+      </p>
     {caption ? (
       <p className="retro mt-2 px-4 text-[0.55rem] text-amber-800">
         {caption}
@@ -623,7 +652,8 @@ const QuestionMarkBlock = ({
       className="absolute right-3 bottom-3 size-3 rounded-sm bg-amber-400 shadow-[0_2px_0_rgba(0,0,0,0.3)]"
     />
   </div>
-);
+  );
+};
 
 type TierFilter = Tier | "ALL";
 
@@ -1701,6 +1731,15 @@ const TechStackConstellation = ({
 
         {/* Constellation Container */}
         <div className="relative min-h-[300px] overflow-hidden rounded-sm border-2 border-dashed border-border/40 bg-gradient-to-b from-background via-background/50 to-background p-3 sm:min-h-[400px] sm:p-4 dark:border-ring/40">
+          {/* Lotus background for Ally theme */}
+          <div className="pointer-events-none absolute inset-0 theme-ally:opacity-40">
+            <Image
+              src="/assets/lotus.png"
+              alt=""
+              fill
+              className="object-cover opacity-0 theme-ally:opacity-100"
+            />
+          </div>
           {/* Background stars effect */}
           <div className="pointer-events-none absolute inset-0">
             {starPositions.map((star, i) => (
@@ -2425,9 +2464,26 @@ export default function ProjectsPage() {
         id="archive-container"
         className={cn(
           shellClass,
-          "border-dashed border-foreground/50 dark:border-ring/50 space-y-6 sm:space-y-8"
+          "border-dashed border-foreground/50 dark:border-ring/50 space-y-6 sm:space-y-8 relative"
         )}
       >
+        {/* Tulips on borders for Ally theme */}
+        <div className="pointer-events-none absolute -left-2 top-0 bottom-0 theme-ally:block hidden">
+          <Image src="/assets/tulip.png" alt="" width={20} height={40} className="absolute top-4 opacity-60" />
+          <Image src="/assets/tulip.png" alt="" width={20} height={40} className="absolute bottom-4 opacity-60" />
+        </div>
+        <div className="pointer-events-none absolute -right-2 top-0 bottom-0 theme-ally:block hidden">
+          <Image src="/assets/tulip.png" alt="" width={20} height={40} className="absolute top-4 opacity-60" />
+          <Image src="/assets/tulip.png" alt="" width={20} height={40} className="absolute bottom-4 opacity-60" />
+        </div>
+        <div className="pointer-events-none absolute left-0 right-0 -top-2 theme-ally:flex hidden justify-between px-4">
+          <Image src="/assets/tulip.png" alt="" width={20} height={40} className="opacity-60" />
+          <Image src="/assets/tulip.png" alt="" width={20} height={40} className="opacity-60" />
+        </div>
+        <div className="pointer-events-none absolute left-0 right-0 -bottom-2 theme-ally:flex hidden justify-between px-4">
+          <Image src="/assets/tulip.png" alt="" width={20} height={40} className="opacity-60" />
+          <Image src="/assets/tulip.png" alt="" width={20} height={40} className="opacity-60" />
+        </div>
         <p className="retro text-center text-[0.5rem] uppercase tracking-[0.25em] text-muted-foreground sm:text-[0.6rem] sm:tracking-[0.3em] md:text-xs md:tracking-[0.35em]">
           Lab Archive Citadel
         </p>
@@ -2576,7 +2632,7 @@ export default function ProjectsPage() {
                       Tier {project.classification.tier} ·{" "}
                       {project.classification.codename}
                     </p>
-                    <p className="retro text-lg uppercase tracking-[0.2em]">
+                    <p className="retro text-lg uppercase tracking-[0.2em] theme-ally:drop-shadow-[2px_2px_0_oklch(0.65_0.25_350)]">
                       {project.title}
                     </p>
                     <p className="retro text-xs text-primary/80">

@@ -112,32 +112,87 @@ export function RetroBackground({
   }, []);
 
   const butterflies = useMemo(() => {
-    return Array.from({ length: 15 }, (_, index) => {
+    return Array.from({ length: 20 }, (_, index) => {
       const baseSeed = index + 300;
+      const position = randomFromSeed(baseSeed);
+      let top: string, left: string;
+      
+      // Position butterflies at borders
+      if (position < 0.25) {
+        // Left border
+        top = percent(0.05 + randomFromSeed(baseSeed * 2) * 0.9);
+        left = percent(-0.02 + randomFromSeed(baseSeed * 3) * 0.04); // -2% to 2%
+      } else if (position < 0.5) {
+        // Right border
+        top = percent(0.05 + randomFromSeed(baseSeed * 2) * 0.9);
+        left = percent(96 + randomFromSeed(baseSeed * 3) * 4); // 96% to 100%
+      } else if (position < 0.75) {
+        // Top border
+        top = percent(-0.02 + randomFromSeed(baseSeed * 2) * 0.04); // -2% to 2%
+        left = percent(0.1 + randomFromSeed(baseSeed * 3) * 0.8);
+      } else {
+        // Bottom border (hanging)
+        top = percent(85 + randomFromSeed(baseSeed * 2) * 15); // 85% to 100%
+        left = percent(0.1 + randomFromSeed(baseSeed * 3) * 0.8);
+      }
+      
       return {
         id: `butterfly-${index}`,
-        top: percent(0.1 + randomFromSeed(baseSeed) * 0.8),
-        left: percent(randomFromSeed(baseSeed * 2)),
-        duration: seconds(15 + randomFromSeed(baseSeed * 3) * 15),
+        top,
+        left,
+        duration: seconds(20 + randomFromSeed(baseSeed * 3) * 20),
         delay: seconds(randomFromSeed(baseSeed * 4) * 5),
-        scale: 0.5 + randomFromSeed(baseSeed * 5) * 0.5,
-        color: randomFromSeed(baseSeed * 6) > 0.5 ? "#FF69B4" : "#FFD700", // Pink or Gold
+        scale: 0.4 + randomFromSeed(baseSeed * 5) * 0.4,
+        color: randomFromSeed(baseSeed * 6) > 0.5 ? "#FF69B4" : "#FFB6D9", // Pink variations
         flutterSpeed: seconds(0.1 + randomFromSeed(baseSeed * 7) * 0.2),
+        position: position < 0.25 ? "left" : position < 0.5 ? "right" : position < 0.75 ? "top" : "bottom",
       };
     });
   }, []);
 
   const flowers = useMemo(() => {
-    return Array.from({ length: 20 }, (_, index) => {
+    return Array.from({ length: 30 }, (_, index) => {
       const baseSeed = index + 400;
+      const position = randomFromSeed(baseSeed);
+      let left: string, bottom: string | undefined, top: string | undefined, right: string | undefined;
+      
+      // Position flowers around containers (at edges)
+      if (position < 0.3) {
+        // Bottom edge
+        left = percent(randomFromSeed(baseSeed * 2) * 0.95);
+        bottom = percent(randomFromSeed(baseSeed * 3) * 0.1); // Bottom 10%
+        top = undefined;
+        right = undefined;
+      } else if (position < 0.55) {
+        // Left edge
+        left = percent(-0.05 + randomFromSeed(baseSeed * 2) * 0.1); // -5% to 5%
+        top = percent(0.1 + randomFromSeed(baseSeed * 3) * 0.8);
+        bottom = undefined;
+        right = undefined;
+      } else if (position < 0.8) {
+        // Right edge
+        right = percent(-0.05 + randomFromSeed(baseSeed * 2) * 0.1); // -5% to 5%
+        top = percent(0.1 + randomFromSeed(baseSeed * 3) * 0.8);
+        left = undefined;
+        bottom = undefined;
+      } else {
+        // Top edge
+        top = percent(randomFromSeed(baseSeed * 2) * 0.1); // Top 10%
+        left = percent(randomFromSeed(baseSeed * 3) * 0.95);
+        bottom = undefined;
+        right = undefined;
+      }
+      
       return {
         id: `flower-${index}`,
-        left: percent(randomFromSeed(baseSeed) * 0.95),
-        bottom: percent(randomFromSeed(baseSeed * 2) * 0.15), // Bottom 15%
-        scale: 0.8 + randomFromSeed(baseSeed * 3) * 0.7,
-        type: Math.floor(randomFromSeed(baseSeed * 4) * 3), // 0, 1, 2
-        swayDuration: seconds(2 + randomFromSeed(baseSeed * 5) * 2),
-        swayDelay: seconds(randomFromSeed(baseSeed * 6) * 2),
+        left,
+        bottom,
+        top,
+        right,
+        scale: 0.6 + randomFromSeed(baseSeed * 4) * 0.6,
+        type: Math.floor(randomFromSeed(baseSeed * 5) * 3), // 0, 1, 2
+        swayDuration: seconds(2 + randomFromSeed(baseSeed * 6) * 2),
+        swayDelay: seconds(randomFromSeed(baseSeed * 7) * 2),
       };
     });
   }, []);
@@ -253,111 +308,9 @@ export function RetroBackground({
           aria-hidden="true"
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(to bottom, #E0F7FA 0%, #FFF9C4 100%)", // Light blue to pale yellow
+            background: "linear-gradient(to bottom, #E0F7FA 0%, #FFB6D9 100%)", // Light blue to pale pink
           }}
-        >
-          {/* Butterflies */}
-          {butterflies.map((butterfly) => (
-            <div
-              key={butterfly.id}
-              className="absolute"
-              style={{
-                top: butterfly.top,
-                left: butterfly.left,
-                animationDelay: butterfly.delay,
-                animationDuration: butterfly.duration,
-                transform: `scale(${butterfly.scale})`,
-                animation: "drift-butterfly linear infinite",
-              }}
-            >
-              {/* Pixel-art butterfly */}
-              <div 
-                className="relative" 
-                style={{ 
-                  width: "20px", 
-                  height: "20px",
-                  animation: `flutter ${butterfly.flutterSpeed} ease-in-out infinite alternate`
-                }}
-              >
-                <div className="absolute" style={{ top: "4px", left: "4px", width: "6px", height: "6px", backgroundColor: butterfly.color, borderRadius: "50%" }} />
-                <div className="absolute" style={{ top: "4px", right: "4px", width: "6px", height: "6px", backgroundColor: butterfly.color, borderRadius: "50%" }} />
-                <div className="absolute" style={{ top: "10px", left: "6px", width: "4px", height: "6px", backgroundColor: butterfly.color, opacity: 0.8, borderRadius: "50%" }} />
-                <div className="absolute" style={{ top: "10px", right: "6px", width: "4px", height: "6px", backgroundColor: butterfly.color, opacity: 0.8, borderRadius: "50%" }} />
-                <div className="absolute bg-black" style={{ top: "6px", left: "9px", width: "2px", height: "10px", borderRadius: "1px" }} />
-              </div>
-            </div>
-          ))}
-
-          {/* Flowers at the bottom */}
-          <div className="absolute bottom-0 left-0 right-0 h-32 overflow-hidden">
-            {flowers.map((flower) => (
-              <div
-                key={flower.id}
-                className="absolute origin-bottom"
-                style={{
-                  left: flower.left,
-                  bottom: flower.bottom,
-                  transform: `scale(${flower.scale})`,
-                  animation: `sway ${flower.swayDuration} ease-in-out infinite alternate`,
-                  animationDelay: flower.swayDelay,
-                }}
-              >
-                {/* Pixel-art flower */}
-                <div className="relative flex flex-col items-center">
-                  {/* Flower Head */}
-                  <div className="relative z-10 size-6">
-                    <div className="absolute inset-0 m-auto size-3 rounded-full bg-yellow-400" />
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 size-3 rounded-full bg-pink-400" />
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 size-3 rounded-full bg-pink-400" />
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 size-3 rounded-full bg-pink-400" />
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 size-3 rounded-full bg-pink-400" />
-                  </div>
-                  {/* Stem */}
-                  <div className="h-12 w-1 bg-green-500" />
-                  {/* Leaves */}
-                  <div className="absolute bottom-4 -left-3 h-3 w-3 rounded-tr-full bg-green-500" />
-                  <div className="absolute bottom-6 -right-3 h-3 w-3 rounded-tl-full bg-green-500" />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <style jsx>{`
-            @keyframes drift-butterfly {
-              from {
-                transform: translateX(-10vw) translateY(0) scale(var(--scale, 1));
-              }
-              25% {
-                transform: translateX(20vw) translateY(-5vh) scale(var(--scale, 1));
-              }
-              50% {
-                transform: translateX(50vw) translateY(0) scale(var(--scale, 1));
-              }
-              75% {
-                transform: translateX(80vw) translateY(5vh) scale(var(--scale, 1));
-              }
-              to {
-                transform: translateX(110vw) translateY(0) scale(var(--scale, 1));
-              }
-            }
-            @keyframes flutter {
-              0% {
-                transform: scaleX(1);
-              }
-              100% {
-                transform: scaleX(0.6);
-              }
-            }
-            @keyframes sway {
-              0% {
-                transform: rotate(-5deg) scale(var(--scale, 1));
-              }
-              100% {
-                transform: rotate(5deg) scale(var(--scale, 1));
-              }
-            }
-          `}</style>
-        </div>
+        />
       ) : (
         // Default stars background
         <div
@@ -403,4 +356,5 @@ export function RetroBackground({
 }
 
 export default RetroBackground;
+
 
