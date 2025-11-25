@@ -32,24 +32,26 @@ export function RetroBackground({
         const theme = localStorage.getItem("terminal-theme");
         const simonMode = localStorage.getItem("terminal-simon-mode");
         const shouldBeMario = theme === "simon" && simonMode === "light";
+        console.log("[RetroBackground] Theme check:", { theme, simonMode, shouldBeMario });
         setIsMarioMode(shouldBeMario);
       }
     };
 
     checkTheme();
 
-    // Listen for custom theme change events
-    const handleThemeChange = () => {
-      checkTheme();
-    };
-
-    window.addEventListener("themeChanged", handleThemeChange);
-    // Also listen for storage changes (for cross-tab updates)
-    window.addEventListener("storage", handleThemeChange);
+    // Listen for custom theme change event
+    window.addEventListener("themeChanged", checkTheme);
+    
+    // Listen for storage changes (for cross-tab)
+    window.addEventListener("storage", checkTheme);
+    
+    // Also check periodically in case localStorage is updated in same tab
+    const interval = setInterval(checkTheme, 200);
 
     return () => {
-      window.removeEventListener("themeChanged", handleThemeChange);
-      window.removeEventListener("storage", handleThemeChange);
+      window.removeEventListener("themeChanged", checkTheme);
+      window.removeEventListener("storage", checkTheme);
+      clearInterval(interval);
     };
   }, []);
 
