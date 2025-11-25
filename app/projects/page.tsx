@@ -1555,6 +1555,7 @@ const TechStackConstellation = ({
   const [hoveredTech, setHoveredTech] = useState<string | null>(null);
   const [selectedTech, setSelectedTech] = useState<string | null>(null);
   const [isAllyMode, setIsAllyMode] = useState(false);
+  const [isSimonMode, setIsSimonMode] = useState(false);
 
   // Generate stable random positions for stars (only on client to avoid hydration mismatch)
   const [starPositions, setStarPositions] = useState<Array<{
@@ -1583,12 +1584,13 @@ const TechStackConstellation = ({
     }
   }, []);
 
-  // Detect Ally theme
+  // Detect Ally and Simon themes
   useEffect(() => {
     const checkTheme = () => {
       if (typeof window !== "undefined") {
         const theme = localStorage.getItem("terminal-theme");
         setIsAllyMode(theme === "ally");
+        setIsSimonMode(theme === "simon");
       }
     };
     checkTheme();
@@ -1680,6 +1682,41 @@ const TechStackConstellation = ({
   };
 
   const formatPercent = (value: number) => value.toFixed(3);
+
+  // Horizontal diamond formation function for Simon theme
+  const getDiamondPosition = (index: number, total: number) => {
+    const centerX = 50;
+    const centerY = 50;
+    const diamondWidth = 70; // Horizontal span of diamond
+    const diamondHeight = 50; // Vertical span of diamond
+    
+    // Divide nodes into 4 sides of the diamond
+    const nodesPerSide = Math.ceil(total / 4);
+    const side = Math.floor(index / nodesPerSide);
+    const positionOnSide = (index % nodesPerSide) / Math.max(1, nodesPerSide - 1);
+    
+    let x: number, y: number;
+    
+    if (side === 0) {
+      // Top-left to top edge (left to center-top)
+      x = centerX - diamondWidth / 2 + positionOnSide * (diamondWidth / 2);
+      y = centerY - (diamondHeight / 2) * positionOnSide;
+    } else if (side === 1) {
+      // Top-right edge (center-top to right)
+      x = centerX + positionOnSide * (diamondWidth / 2);
+      y = centerY - (diamondHeight / 2) * (1 - positionOnSide);
+    } else if (side === 2) {
+      // Bottom-right edge (right to center-bottom)
+      x = centerX + (diamondWidth / 2) * (1 - positionOnSide);
+      y = centerY + (diamondHeight / 2) * positionOnSide;
+    } else {
+      // Bottom-left edge (center-bottom to left)
+      x = centerX - positionOnSide * (diamondWidth / 2);
+      y = centerY + (diamondHeight / 2) * (1 - positionOnSide);
+    }
+    
+    return { x, y };
+  };
 
   // Butterfly formation function for Ally theme
   const getButterflyPosition = (index: number, total: number) => {
@@ -1863,6 +1900,14 @@ const TechStackConstellation = ({
                 y1 = pos1.y;
                 x2 = pos2.x;
                 y2 = pos2.y;
+              } else if (isSimonMode) {
+                // Horizontal diamond formation
+                const pos1 = getDiamondPosition(fromIndex, techData.length);
+                const pos2 = getDiamondPosition(toIndex, techData.length);
+                x1 = pos1.x;
+                y1 = pos1.y;
+                x2 = pos2.x;
+                y2 = pos2.y;
               } else {
                 // Circular layout
                 const angle1 = (fromIndex / techData.length) * 2 * Math.PI;
@@ -1915,6 +1960,11 @@ const TechStackConstellation = ({
               if (isAllyMode) {
                 // Butterfly formation
                 const pos = getButterflyPosition(index, techData.length);
+                x = pos.x;
+                y = pos.y;
+              } else if (isSimonMode) {
+                // Horizontal diamond formation
+                const pos = getDiamondPosition(index, techData.length);
                 x = pos.x;
                 y = pos.y;
               } else {
